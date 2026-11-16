@@ -83,8 +83,8 @@ class SetorRotaAdmin(admin.ModelAdmin):
 
     def status_conclusao(self, obj):
         if obj.concluido:
-            return format_html('<span style="color: #10b981; font-weight: bold;">✓ Varrido / Concluído</span>')
-        return format_html('<span style="color: #f59e0b; font-weight: bold;">⏳ Em Aberto</span>')
+            return format_html('<span style="color: #10b981; font-weight: bold;">{}</span>', '✓ Varrido / Concluído')
+        return format_html('<span style="color: #f59e0b; font-weight: bold;">{}</span>', '⏳ Em Aberto')
     status_conclusao.short_description = "Situação"
 
 
