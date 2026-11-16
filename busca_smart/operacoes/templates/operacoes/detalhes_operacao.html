@@ -1,0 +1,312 @@
+{% extends 'operacoes/base.html' %}
+
+{% block title %}{{ operacao.nome }} — Ficha da Operação — BuscaSmart{% endblock %}
+
+{% block extra_head %}
+<!-- Leaflet CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-8">
+
+    <!-- Cabeçalho da Ficha -->
+    <div class="bg-tactical-900 border border-slate-800 rounded-xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+            <div class="flex items-center gap-2 mb-1 text-xs font-semibold text-slate-400">
+                <a href="{% url 'dashboard' %}" class="hover:text-white transition">Dashboard</a>
+                <span>›</span>
+                <span class="text-emerald-400">Ficha da Operação</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <h1 class="text-xl font-bold text-white">{{ operacao.nome }}</h1>
+                <span class="bg-slate-950 text-slate-300 font-mono text-xs px-2.5 py-1 rounded-md border border-slate-800 font-bold">
+                    {{ operacao.codigo_convite }}
+                </span>
+            </div>
+            <p class="text-xs text-slate-400 mt-1 max-w-2xl">{{ operacao.descricao|default:"Sem instruções adicionais cadastradas." }}</p>
+        </div>
+
+        <!-- Botões de Ação do Cabeçalho -->
+        <div class="flex flex-wrap items-center gap-3">
+            <a href="{% url 'painel_mapa_operacao' operacao.id %}" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium px-3.5 py-2 rounded-lg text-xs transition flex items-center gap-1.5">
+                <span>🗺️</span>
+                <span>Editar no Mapa</span>
+            </a>
+            <a href="{% url 'gerenciar_equipe_operacao' operacao.id %}" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium px-3.5 py-2 rounded-lg text-xs transition flex items-center gap-1.5">
+                <span>👥</span>
+                <span>Equipes</span>
+            </a>
+            <a href="{% url 'relatorio_oficial' operacao.id %}" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2 rounded-lg text-xs transition flex items-center gap-1.5 shadow-md shadow-emerald-600/30">
+                <span>🖨️</span>
+                <span>Relatório Oficial (PDF)</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Linha de Métricas Rápidas -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-tactical-900 border border-slate-800 rounded-xl p-4">
+            <span class="text-[11px] font-semibold uppercase text-slate-400 tracking-wider">Área Delimitada</span>
+            <div class="text-xl font-bold text-white mt-1">{{ operacao.area_total_km2 }} km²</div>
+            <span class="text-[11px] text-cyan-400">Total: {{ operacao.area_total_km2|floatformat:2 }} ha</span>
+        </div>
+        <div class="bg-tactical-900 border border-slate-800 rounded-xl p-4">
+            <span class="text-[11px] font-semibold uppercase text-slate-400 tracking-wider">Progresso da Varredura</span>
+            <div class="text-xl font-bold text-emerald-400 mt-1">{{ taxa_conclusao }}%</div>
+            <span class="text-[11px] text-slate-400">{{ setores_concluidos }} de {{ total_setores }} setores concluídos</span>
+        </div>
+        <div class="bg-tactical-900 border border-slate-800 rounded-xl p-4">
+            <span class="text-[11px] font-semibold uppercase text-slate-400 tracking-wider">Pontos & Evidências</span>
+            <div class="text-xl font-bold text-amber-400 mt-1">{{ pontos.count }}</div>
+            <span class="text-[11px] text-slate-400">Marcadores georreferenciados</span>
+        </div>
+        <div class="bg-tactical-900 border border-slate-800 rounded-xl p-4">
+            <span class="text-[11px] font-semibold uppercase text-slate-400 tracking-wider">Data de Início</span>
+            <div class="text-base font-bold text-white mt-1">{{ operacao.criado_em|date:"d/m/Y H:i" }}</div>
+            <span class="text-[11px] text-slate-400">Coordenador: {{ operacao.coordenador.username }}</span>
+        </div>
+    </div>
+
+    <!-- Mapa e Pontos Georreferenciados -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Mini-Mapa Interativo (2 Colunas) -->
+        <div class="lg:col-span-2 space-y-4">
+            <div class="bg-tactical-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
+                <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                        <span>🛰️</span>
+                        <span>Visualização Geográfica dos Setores e Marcadores</span>
+                    </h3>
+                    <button onclick="abrirModalPonto()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs px-3 py-1.5 rounded-lg transition flex items-center gap-1 cursor-pointer">
+                        <span>+</span>
+                        <span>Novo Marcador/Ponto</span>
+                    </button>
+                </div>
+                <div id="mini-map" class="h-96 w-full z-0 bg-slate-950"></div>
+            </div>
+
+            <!-- Tabela de Pontos de Sinalização & Evidências -->
+            <div class="bg-tactical-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                    <span>📍</span>
+                    <span>Registro de Pontos de Sinalização & Evidências ({{ pontos.count }})</span>
+                </h3>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                            <tr>
+                                <th class="p-3">Tipo</th>
+                                <th class="p-3">Título</th>
+                                <th class="p-3">Descrição / Detalhe</th>
+                                <th class="p-3">Coordenadas (Lat/Lng)</th>
+                                <th class="p-3">Hora de Registro</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/60">
+                            {% for p in pontos %}
+                            <tr class="hover:bg-slate-800/40 transition">
+                                <td class="p-3">
+                                    {% if p.tipo == 'BASE' %}
+                                        <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded text-[10px] font-bold">Base (ICP)</span>
+                                    {% elif p.tipo == 'ULTIMO_PONTO' %}
+                                        <span class="bg-rose-500/20 text-rose-400 border border-rose-500/30 px-2 py-0.5 rounded text-[10px] font-bold">LKP</span>
+                                    {% elif p.tipo == 'EVIDENCIA' %}
+                                        <span class="bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded text-[10px] font-bold">Evidência</span>
+                                    {% elif p.tipo == 'OBSTACULO' %}
+                                        <span class="bg-purple-500/20 text-purple-400 border border-purple-500/30 px-2 py-0.5 rounded text-[10px] font-bold">Obstáculo</span>
+                                    {% else %}
+                                        <span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[10px]">Referência</span>
+                                    {% endif %}
+                                </td>
+                                <td class="p-3 font-semibold text-white">{{ p.titulo }}</td>
+                                <td class="p-3 text-slate-400 max-w-xs">{{ p.descricao|default:"—" }}</td>
+                                <td class="p-3 font-mono text-[11px] text-cyan-400">{{ p.latitude|floatformat:4 }}, {{ p.longitude|floatformat:4 }}</td>
+                                <td class="p-3 text-slate-500">{{ p.criado_em|date:"d/m H:i" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="p-6 text-center text-slate-500 italic">
+                                    Nenhum ponto de sinalização registrado. Adicione o Posto de Comando ou o Último Ponto Visto (LKP).
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coluna Lateral: Resumo dos Setores e Coordenador -->
+        <div class="space-y-6">
+            <div class="bg-tactical-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                    <span>🧭</span>
+                    <span>Setores Atribuídos</span>
+                </h3>
+
+                <div class="space-y-2">
+                    {% for s in setores %}
+                    <div class="p-3 rounded-lg bg-slate-950 border border-slate-800/80 flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-3 h-3 rounded-full" style="background-color: {{ s.cor_hex }};"></span>
+                            <div>
+                                <span class="text-xs font-bold text-white block">{{ s.identificacao }}</span>
+                                <span class="text-[11px] text-slate-400">Resp: {{ s.responsavel.username|default:"Não definido" }}</span>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded {% if s.concluido %}bg-emerald-500/20 text-emerald-400{% else %}bg-amber-500/20 text-amber-400{% endif %}">
+                            {% if s.concluido %}Varrido{% else %}Pendente{% endif %}
+                        </span>
+                    </div>
+                    {% empty %}
+                    <p class="text-xs text-slate-500 italic">Nenhum setor cadastrado.</p>
+                    {% endfor %}
+                </div>
+
+                <a href="{% url 'gerenciar_equipe_operacao' operacao.id %}" class="block text-center w-full bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium py-2 rounded-lg transition">
+                    Gerenciar Responsáveis dos Setores
+                </a>
+            </div>
+
+            <!-- Briefing Tático Automático -->
+            <div class="bg-tactical-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-3">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                    <span>🤖</span>
+                    <span>Parecer Tático Automático</span>
+                </h3>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Operação em conformidade com o plano geográfico inicial. 
+                    A cobertura atual de <strong>{{ taxa_conclusao }}%</strong> indica que o esforço deve focar 
+                    na finalização dos setores abertos antes das 17h00 para evitar operações noturnas em terreno acidentado.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CADASTRAR NOVO PONTO -->
+<div id="modal-ponto" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-tactical-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl relative">
+        <button onclick="fecharModalPonto()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg cursor-pointer">✕</button>
+
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+            <span>📍</span>
+            <span>Cadastrar Ponto de Sinalização / Evidência</span>
+        </h3>
+
+        <form id="form-novo-ponto" class="space-y-3">
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Título do Ponto</label>
+                <input type="text" id="ponto-titulo" required placeholder="Ex: Pegada recente de bota" 
+                       class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Tipo de Sinalização</label>
+                <select id="ponto-tipo" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                    <option value="BASE">Base de Comando (ICP)</option>
+                    <option value="ULTIMO_PONTO">Último Ponto Visto (LKP)</option>
+                    <option value="EVIDENCIA" selected>Possível Evidência / Vestígio</option>
+                    <option value="OBSTACULO">Obstáculo / Área de Risco</option>
+                    <option value="REFERENCIA">Ponto de Referência</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Latitude</label>
+                    <input type="number" step="any" id="ponto-lat" required value="-6.5130" 
+                           class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Longitude</label>
+                    <input type="number" step="any" id="ponto-lng" required value="-36.3450" 
+                           class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Descrição / Observações</label>
+                <textarea id="ponto-desc" rows="3" placeholder="Informações detalhadas sobre a evidência ou ponto..." 
+                          class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"></textarea>
+            </div>
+
+            <div class="flex items-center gap-3 pt-2">
+                <button type="button" onclick="fecharModalPonto()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-medium py-2 rounded-lg text-xs transition">
+                    Cancelar
+                </button>
+                <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2 rounded-lg text-xs transition shadow-md shadow-emerald-600/30">
+                    Salvar Ponto
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Inicializa Mini-Mapa Leaflet
+    const miniMap = L.map('mini-map').setView([-6.5122, -36.3469], 14);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{x}/{y}', {
+        attribution: '© Esri Satellite'
+    }).addTo(miniMap);
+
+    // Carrega Polígono GeoJSON se existir
+    const areaGeojson = {{ operacao.area_delimitada_geojson|default:'null'|safe }};
+    if (areaGeojson) {
+        const layerArea = L.geoJSON(areaGeojson, {
+            style: { color: '#f97316', weight: 2, fillOpacity: 0.2 }
+        }).addTo(miniMap);
+        miniMap.fitBounds(layerArea.getBounds(), { padding: [20, 20] });
+    }
+
+    // Carrega Pontos de Sinalização no Mapa
+    {% for p in pontos %}
+        L.marker([{{ p.latitude }}, {{ p.longitude }}])
+            .bindPopup("<b>{{ p.titulo }}</b><br>{{ p.get_tipo_display }}<br>{{ p.descricao }}")
+            .addTo(miniMap);
+    {% endfor %}
+
+    // Modal
+    function abrirModalPonto() {
+        document.getElementById('modal-ponto').classList.remove('hidden');
+    }
+    function fecharModalPonto() {
+        document.getElementById('modal-ponto').classList.add('hidden');
+    }
+
+    // Salvar Ponto via API
+    document.getElementById('form-novo-ponto').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const dados = {
+            titulo: document.getElementById('ponto-titulo').value,
+            tipo: document.getElementById('ponto-tipo').value,
+            latitude: document.getElementById('ponto-lat').value,
+            longitude: document.getElementById('ponto-lng').value,
+            descricao: document.getElementById('ponto-desc').value
+        };
+
+        try {
+            const resp = await fetch('{% url "api_adicionar_ponto" operacao.id %}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dados)
+            });
+
+            if (resp.ok) {
+                alert('Ponto de sinalização cadastrado com sucesso!');
+                window.location.reload();
+            } else {
+                alert('Erro ao salvar ponto.');
+            }
+        } catch (e) {
+            alert('Erro de conexão ao salvar ponto.');
+        }
+    });
+</script>
+{% endblock %}

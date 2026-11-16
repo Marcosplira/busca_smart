@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório Oficial de Missão SAR — {{ operacao.nome }} — BuscaSmart</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-100 text-slate-800 font-sans p-6 md:p-12 min-h-screen">
+
+    <!-- Barra de Controle Superior (Não aparece na impressão) -->
+    <div class="no-print max-w-4xl mx-auto mb-6 flex items-center justify-between bg-slate-900 text-white p-4 rounded-xl shadow-md">
+        <a href="{% url 'detalhes_operacao' operacao.id %}" class="text-xs text-slate-400 hover:text-white flex items-center gap-1">
+            <span>←</span> Voltar aos Detalhes
+        </a>
+        <div class="flex items-center gap-3">
+            <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-4 py-2 rounded-lg flex items-center gap-2 shadow cursor-pointer transition">
+                <span>🖨️</span>
+                <span>Imprimir / Salvar como PDF</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Documento Formal do Relatório Oficial -->
+    <div class="max-w-4xl mx-auto bg-white border border-slate-300 p-8 md:p-12 shadow-sm rounded-lg space-y-6">
+
+        <!-- Cabeçalho Oficial -->
+        <div class="border-b-2 border-slate-800 pb-6 flex items-start justify-between">
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="bg-slate-900 text-white font-black text-xs px-2 py-1 tracking-widest rounded">BUSCASMART</span>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-600">Protocolo Territorial SAR</span>
+                </div>
+                <h1 class="text-2xl font-black text-slate-900 mt-2 tracking-tight">RELATÓRIO TÁTICO DE MISSÃO DE BUSCA</h1>
+                <p class="text-xs text-slate-500 mt-0.5">Documento emitido para coordenação, Defesa Civil e Corpo de Bombeiros</p>
+            </div>
+            <div class="text-right text-xs text-slate-600 space-y-1">
+                <div><strong>Missão ID:</strong> #{{ operacao.id }}</div>
+                <div><strong>Código de Convite:</strong> <span class="font-mono font-bold text-slate-900">{{ operacao.codigo_convite }}</span></div>
+                <div><strong>Emissão:</strong> {{ data_emissao|date:"d/m/Y H:i" }}</div>
+            </div>
+        </div>
+
+        <!-- Dados Gerais da Operação -->
+        <div>
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1 mb-3">
+                1. Informações Gerais da Operação
+            </h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                <div class="p-3 bg-slate-50 border border-slate-200 rounded">
+                    <span class="text-slate-500 block">Nome da Missão:</span>
+                    <strong class="text-slate-900">{{ operacao.nome }}</strong>
+                </div>
+                <div class="p-3 bg-slate-50 border border-slate-200 rounded">
+                    <span class="text-slate-500 block">Status Operacional:</span>
+                    <strong class="text-emerald-700 uppercase">{{ operacao.get_status_display }}</strong>
+                </div>
+                <div class="p-3 bg-slate-50 border border-slate-200 rounded">
+                    <span class="text-slate-500 block">Área Mapeada:</span>
+                    <strong class="text-slate-900">{{ operacao.area_total_km2 }} km² ({{ operacao.area_total_km2|floatformat:2 }} ha)</strong>
+                </div>
+                <div class="p-3 bg-slate-50 border border-slate-200 rounded">
+                    <span class="text-slate-500 block">Coordenador Responsável:</span>
+                    <strong class="text-slate-900">{{ operacao.coordenador.get_full_name|default:operacao.coordenador.username }}</strong>
+                </div>
+            </div>
+
+            {% if operacao.descricao %}
+            <div class="mt-3 p-3 bg-slate-50 border border-slate-200 rounded text-xs text-slate-700">
+                <span class="font-bold text-slate-900">Instruções / Histórico Inicial:</span>
+                <p class="mt-1 leading-relaxed">{{ operacao.descricao }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Setorização e Equipes -->
+        <div>
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1 mb-3">
+                2. Setorização Geográfica e Cobertura das Equipes
+            </h2>
+            <table class="w-full text-left text-xs border border-slate-300">
+                <thead class="bg-slate-100 text-slate-700 uppercase font-semibold border-b border-slate-300">
+                    <tr>
+                        <th class="p-2.5 border-r border-slate-300">Identificação</th>
+                        <th class="p-2.5 border-r border-slate-300">Responsável Atribuído</th>
+                        <th class="p-2.5 border-r border-slate-300">Instruções de Varredura</th>
+                        <th class="p-2.5">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                    {% for s in setores %}
+                    <tr>
+                        <td class="p-2.5 font-bold border-r border-slate-300">{{ s.identificacao }}</td>
+                        <td class="p-2.5 border-r border-slate-300">{% if s.responsavel %}{{ s.responsavel.get_full_name|default:s.responsavel.username }}{% else %}Não atribuído{% endif %}</td>
+                        <td class="p-2.5 border-r border-slate-300">{{ s.instrucoes_especificas|default:"Varredura de linha padrão." }}</td>
+                        <td class="p-2.5 font-bold {% if s.concluido %}text-emerald-700{% else %}text-amber-700{% endif %}">
+                            {% if s.concluido %}VARRIDO / CONCLUÍDO{% else %}PENDENTE{% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="p-3 text-center text-slate-500 italic">Nenhum setor registrado.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Evidências e Pontos de Sinalização -->
+        <div>
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1 mb-3">
+                3. Registro Georreferenciado de Evidências e Pontos Críticos
+            </h2>
+            <table class="w-full text-left text-xs border border-slate-300">
+                <thead class="bg-slate-100 text-slate-700 uppercase font-semibold border-b border-slate-300">
+                    <tr>
+                        <th class="p-2.5 border-r border-slate-300">Tipo</th>
+                        <th class="p-2.5 border-r border-slate-300">Título / Ocorrência</th>
+                        <th class="p-2.5 border-r border-slate-300">Coordenadas GPS</th>
+                        <th class="p-2.5 border-r border-slate-300">Descrição Técnica</th>
+                        <th class="p-2.5">Hora</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                    {% for p in pontos %}
+                    <tr>
+                        <td class="p-2.5 font-bold border-r border-slate-300">{{ p.get_tipo_display }}</td>
+                        <td class="p-2.5 font-semibold border-r border-slate-300">{{ p.titulo }}</td>
+                        <td class="p-2.5 font-mono border-r border-slate-300">{{ p.latitude|floatformat:4 }}, {{ p.longitude|floatformat:4 }}</td>
+                        <td class="p-2.5 border-r border-slate-300">{{ p.descricao|default:"—" }}</td>
+                        <td class="p-2.5 text-slate-600">{{ p.criado_em|date:"d/m H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="p-3 text-center text-slate-500 italic">Nenhum ponto registrado.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Parecer Tático e Assinaturas -->
+        <div class="pt-6 border-t border-slate-300 space-y-12">
+            <div>
+                <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 mb-2">
+                    4. Parecer e Recomendações Táticas do Comando
+                </h2>
+                <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 border border-slate-200 rounded">
+                    As ações operacionais seguiram os parâmetros de busca territorial em área rural/mata, 
+                    com suporte a divisões vetoriais automatizadas por satélite e rastreabilidade dos voluntários. 
+                    Todas as evidências registradas foram catalogadas com latitude e longitude para averiguação pericial.
+                </p>
+            </div>
+
+            <!-- Assinaturas -->
+            <div class="grid grid-cols-2 gap-12 text-center text-xs pt-8">
+                <div>
+                    <div class="border-t border-slate-400 w-3/4 mx-auto pt-2">
+                        <strong class="block text-slate-900">{{ operacao.coordenador.get_full_name|default:operacao.coordenador.username }}</strong>
+                        <span class="text-slate-500">Coordenador Geral de Operações SAR</span>
+                    </div>
+                </div>
+                <div>
+                    <div class="border-t border-slate-400 w-3/4 mx-auto pt-2">
+                        <strong class="block text-slate-900">Autoridade Responsável / Fiscal</strong>
+                        <span class="text-slate-500">Defesa Civil / Corpo de Bombeiros Militar</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

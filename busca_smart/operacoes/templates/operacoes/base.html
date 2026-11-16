@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BuscaSmart — Sistema Integrado de Busca e Salvamento{% endblock %}</title>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        tactical: {
+                            950: '#090d16',
+                            900: '#0f172a',
+                            850: '#131e33',
+                            800: '#1e293b',
+                            700: '#334155',
+                            accent: '#10b981', // emerald-500
+                            orange: '#f97316',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="bg-tactical-950 text-slate-100 font-sans min-h-screen flex antialiased selection:bg-emerald-500 selection:text-white">
+
+    <!-- Sidebar Lateral Tática (Inspirada na Imagem 3) -->
+    <aside class="w-64 bg-tactical-900 border-r border-slate-800 flex flex-col justify-between hidden md:flex shrink-0 z-20">
+        <div>
+            <!-- Logo & Brand Header -->
+            <div class="p-5 border-b border-slate-800/80 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-white font-black text-xl">
+                    ⚡
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-extrabold tracking-tight text-white text-base">BuscaSmart</span>
+                        <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase">SAR</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-medium">Painel Tático de Comando</p>
+                </div>
+            </div>
+
+            <!-- Navegação -->
+            <nav class="p-4 space-y-6">
+                <!-- Seção Principal -->
+                <div>
+                    <span class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-2">Principal</span>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="{% url 'pagina_inicial' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition {% if pagina_ativa == 'inicio' %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-semibold{% else %}text-slate-400 hover:text-white hover:bg-slate-800/60{% endif %}">
+                                <span class="text-base">🏠</span>
+                                <span>Página Inicial</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'dashboard' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition {% if pagina_ativa == 'dashboard' %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-semibold{% else %}text-slate-400 hover:text-white hover:bg-slate-800/60{% endif %}">
+                                <span class="text-base">📊</span>
+                                <span>Dashboard Geral</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'painel_mapa' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition {% if pagina_ativa == 'mapa' %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-semibold{% else %}text-slate-400 hover:text-white hover:bg-slate-800/60{% endif %}">
+                                <span class="text-base">🗺️</span>
+                                <span>Mapa de Operação</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'gerenciar_equipe' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition {% if pagina_ativa == 'equipe' %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-semibold{% else %}text-slate-400 hover:text-white hover:bg-slate-800/60{% endif %}">
+                                <span class="text-base">👥</span>
+                                <span>Gerenciar Equipe</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'minha_rota' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition {% if pagina_ativa == 'minha_rota' %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-semibold{% else %}text-slate-400 hover:text-white hover:bg-slate-800/60{% endif %}">
+                                <span class="text-base">📱</span>
+                                <span>Minha Rota & Offline</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Seção Inteligência & IA -->
+                <div>
+                    <span class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-2">Inteligência Tática</span>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="{% url 'chat_ia' %}" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition {% if pagina_ativa == 'ia_chat' %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-semibold{% else %}text-slate-400 hover:text-white hover:bg-slate-800/60{% endif %}">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-base">🤖</span>
+                                    <span>Chat com IA</span>
+                                </div>
+                                <span class="bg-emerald-500/20 text-emerald-400 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-emerald-500/30 animate-pulse">Ativo</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Seção Sistema & Sobre -->
+                <div>
+                    <span class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-2">Sistema & Suporte</span>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="{% url 'sobre_projeto' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition {% if pagina_ativa == 'sobre' %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-semibold{% else %}text-slate-400 hover:text-white hover:bg-slate-800/60{% endif %}">
+                                <span class="text-base">ℹ️</span>
+                                <span>Sobre o Projeto</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/admin/" target="_blank" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
+                                <span class="text-base">⚙️</span>
+                                <span>Painel Django Admin</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Footer da Sidebar (Perfil do Coordenador) -->
+        <div class="p-4 border-t border-slate-800/80 bg-slate-900/40">
+            {% if request.user.is_authenticated %}
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2.5 overflow-hidden">
+                    <div class="w-8 h-8 rounded-full bg-emerald-700/40 border border-emerald-500/50 flex items-center justify-center text-emerald-300 font-bold text-xs shrink-0">
+                        {{ request.user.username|slice:":2"|upper }}
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="text-xs font-semibold text-slate-200 truncate">{{ request.user.get_full_name|default:request.user.username }}</p>
+                        <span class="text-[10px] text-emerald-400 font-medium block">● Coordenador Ativo</span>
+                    </div>
+                </div>
+                <a href="{% url 'logout' %}" title="Encerrar Sessão" class="text-slate-400 hover:text-rose-400 text-xs p-1.5 rounded hover:bg-slate-800 transition">
+                    🚪
+                </a>
+            </div>
+            {% else %}
+            <div class="mb-2">
+                <a href="{% url 'login' %}" class="w-full bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 text-xs font-semibold py-1.5 rounded-lg flex items-center justify-center gap-1.5 transition">
+                    <span>🔑</span>
+                    <span>Entrar no Sistema</span>
+                </a>
+            </div>
+            {% endif %}
+            <a href="{% url 'sobre_projeto' %}" class="text-[11px] text-slate-500 hover:text-slate-400 flex items-center justify-between pt-1 border-t border-slate-800/60">
+                <span>BuscaSmart v1.0 • Picuí-PB</span>
+                <span>↗</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Conteúdo Principal -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+
+        <!-- Barra Superior (Topbar) com Relógio ao Vivo e Saudação (Inspirada na Imagem 3) -->
+        <header class="bg-tactical-900/90 backdrop-blur border-b border-slate-800 px-6 py-3.5 flex items-center justify-between sticky top-0 z-10">
+            <!-- Saudação e Horário Dinâmico -->
+            <div class="flex flex-col">
+                <div class="text-[12px] text-slate-400 font-mono flex items-center gap-2">
+                    <span id="data-hora-topo">Carregando telemetria...</span>
+                </div>
+                <div class="text-base font-bold text-white flex items-center gap-2">
+                    <span>Bom dia, {% if request.user.is_authenticated %}{{ request.user.first_name|default:request.user.username }}{% else %}Coordenador{% endif %}</span>
+                    <span class="text-lg">👋</span>
+                </div>
+            </div>
+
+            <!-- Botões Rápidos do Topo -->
+            <div class="flex items-center gap-3">
+                <a href="{% url 'painel_mapa' %}" class="hidden sm:inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs px-3.5 py-2 rounded-lg shadow-sm shadow-emerald-600/30 transition">
+                    <span>🗺️</span>
+                    <span>Delimitar no Mapa</span>
+                </a>
+
+                <a href="{% url 'chat_ia' %}" class="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium text-xs px-3.5 py-2 rounded-lg transition">
+                    <span>💬</span>
+                    <span>Chat com IA</span>
+                </a>
+
+                {% if request.user.is_authenticated %}
+                <a href="{% url 'logout' %}" class="hidden sm:inline-flex items-center gap-1.5 bg-slate-800/60 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 border border-slate-700 hover:border-rose-500/30 font-medium text-xs px-3 py-2 rounded-lg transition">
+                    <span>🚪</span>
+                    <span>Sair</span>
+                </a>
+                {% else %}
+                <a href="{% url 'login' %}" class="hidden sm:inline-flex items-center gap-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 font-medium text-xs px-3 py-2 rounded-lg transition">
+                    <span>🔑</span>
+                    <span>Entrar</span>
+                </a>
+                {% endif %}
+            </div>
+        </header>
+
+        <!-- Área de Conteúdo Específico -->
+        <main class="flex-1 p-6 md:p-8">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Rodapé Global -->
+        <footer class="border-t border-slate-800/80 px-6 py-4 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-3 bg-tactical-900/30">
+            <div>
+                © 2026 <strong>BuscaSmart</strong> — Tecnologia e Inteligência para Busca & Salvamento.
+            </div>
+            <div class="flex items-center gap-4 text-slate-400">
+                <a href="{% url 'sobre_projeto' %}" class="hover:text-emerald-400 transition">Sobre o Projeto</a>
+                <span>•</span>
+                <a href="{% url 'chat_ia' %}" class="hover:text-emerald-400 transition">Assistente IA</a>
+                <span>•</span>
+                <span class="text-emerald-500 font-medium">Status: Sistema Operante</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Script de Relógio Dinâmico -->
+    <script>
+        function atualizarRelogio() {
+            const agora = new Date();
+            const dias = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+            const meses = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+            
+            const diaSemana = dias[agora.getDay()];
+            const dia = String(agora.getDate()).padStart(2, '0');
+            const mes = meses[agora.getMonth()];
+            const hora = String(agora.getHours()).padStart(2, '0');
+            const minuto = String(agora.getMinutes()).padStart(2, '0');
+            const segundo = String(agora.getSeconds()).padStart(2, '0');
+
+            const elemento = document.getElementById('data-hora-topo');
+            if (elemento) {
+                elemento.innerText = `${diaSemana}, ${dia} de ${mes} • ${hora}:${minuto}:${segundo}`;
+            }
+        }
+        setInterval(atualizarRelogio, 1000);
+        atualizarRelogio();
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+
+</html>

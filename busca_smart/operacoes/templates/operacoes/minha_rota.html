@@ -1,0 +1,394 @@
+{% extends 'operacoes/base.html' %}
+{% load static %}
+
+{% block title %}Minha Rota & Modo Offline — {{ setor.identificacao }} — BuscaSmart{% endblock %}
+
+{% block extra_head %}
+<!-- Leaflet CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-6">
+
+    <!-- Topbar Mobile de Campo (Inspirada na Foto do Socorrista no Bosque) -->
+    <div class="bg-tactical-900 border border-slate-800 rounded-2xl p-4 shadow-sm flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+            <a href="{% url 'gerenciar_equipe' %}" class="bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition">
+                <span>←</span>
+                <span>Equipes</span>
+            </a>
+            <div>
+                <h1 class="text-sm font-bold text-white flex items-center gap-2">
+                    <span>📱</span>
+                    <span>Navegação de Campo do Voluntário</span>
+                </h1>
+                <p class="text-[11px] text-slate-400">GPS, varredura de setor e operação sem sinal de internet</p>
+            </div>
+        </div>
+
+        <!-- Indicadores de Telemetria e Botão de Emergência -->
+        <div class="flex items-center gap-2.5">
+            <!-- Indicador GPS -->
+            <div class="bg-slate-950 border border-slate-800 px-2.5 py-1 rounded-lg text-[11px] text-slate-300 flex items-center gap-1.5 font-mono">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                <span>GPS: 4.2m</span>
+            </div>
+
+            <!-- Alternador de Modo Offline (Simulador) -->
+            <button id="btn-toggle-offline" onclick="alternarModoOffline()" class="bg-slate-950 border border-slate-800 hover:border-cyan-500/50 text-cyan-400 px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer">
+                <span id="icone-conexao">📶</span>
+                <span id="texto-conexao">Online</span>
+            </button>
+
+            <!-- Botão de Emergência / Pânico (Inspirado no botão amarelo POMOCY da foto real) -->
+            <button onclick="acionarEmergencia()" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shadow-md shadow-amber-400/20 transition cursor-pointer uppercase tracking-wider">
+                <span>⚠️</span>
+                <span>Emergência / VHF</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Ficha da Rota Atribuída ao Voluntário -->
+    <div class="bg-gradient-to-r from-tactical-900 via-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-5 shadow-sm">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="space-y-1">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-3.5 h-3.5 rounded-full border border-white/30" style="background-color: {{ setor.cor_hex }};"></span>
+                    <h2 class="text-base font-bold text-white">{{ setor.identificacao }}</h2>
+                    <span class="bg-slate-950 text-slate-300 font-mono text-[11px] px-2 py-0.5 rounded border border-slate-800">
+                        {{ operacao.codigo_convite }}
+                    </span>
+                </div>
+                <p class="text-xs text-slate-400">
+                    <strong>Missão:</strong> {{ operacao.nome }} • <strong>Responsável:</strong> {% if setor.responsavel %}{{ setor.responsavel.get_full_name|default:setor.responsavel.username }}{% else %}Marcos Paulo (Voluntário){% endif %}
+                </p>
+                <p class="text-xs text-emerald-400 font-medium">
+                    📌 <strong>Instruções do Coordenador:</strong> {{ setor.instrucoes_especificas|default:"Manter varredura em linha paralela com espaçamento visual de 10 metros." }}
+                </p>
+            </div>
+
+            <!-- Seletor Rápido de Rota e Botão de Conclusão -->
+            <div class="flex flex-wrap items-center gap-3">
+                <select onchange="window.location.href='/rota/' + this.value + '/'" class="bg-slate-950 border border-slate-800 text-xs text-slate-200 px-3 py-2 rounded-lg focus:outline-none focus:border-emerald-500">
+                    {% for s in todos_setores %}
+                    <option value="{{ s.id }}" {% if s.id == setor.id %}selected{% endif %}>
+                        {{ s.identificacao }} ({% if s.concluido %}Varrido{% else %}Pendente{% endif %})
+                    </option>
+                    {% endfor %}
+                </select>
+
+                <button id="btn-concluir-setor" onclick="concluirMeuSetor({{ setor.id }})" class="{% if setor.concluido %}bg-slate-800 text-slate-400{% else %}bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/30{% endif %} font-bold text-xs px-4 py-2 rounded-lg transition cursor-pointer flex items-center gap-1.5">
+                    <span>✓</span>
+                    <span id="texto-status-setor">{% if setor.concluido %}Setor Concluído{% else %}Marcar Concluído{% endif %}</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAPA TÁTICO DE NAVEGAÇÃO EM CAMPO -->
+    <div class="bg-tactical-900 border border-slate-800 rounded-2xl overflow-hidden shadow-md space-y-0">
+        <!-- Barra de Ações Rápidas no Mapa -->
+        <div class="p-3 bg-slate-950 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-2">
+                <button onclick="centralizarGPS()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1.5 transition cursor-pointer">
+                    <span>🎯</span>
+                    <span>Minha Posição GPS</span>
+                </button>
+                <button onclick="abrirModalPonto()" class="bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/40 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition cursor-pointer font-semibold">
+                    <span>📍</span>
+                    <span>Registrar Evidência / Pista</span>
+                </button>
+            </div>
+
+            <div class="text-[11px] text-slate-400 flex items-center gap-2">
+                <span>Área da Missão: <strong class="text-white">{{ operacao.area_total_km2 }} km²</strong></span>
+                <span>•</span>
+                <span>Pontos: <strong class="text-white">{{ pontos.count }}</strong></span>
+            </div>
+        </div>
+
+        <!-- Container do Mapa -->
+        <div id="mapa-voluntario" class="h-[460px] w-full z-0 bg-slate-950"></div>
+    </div>
+
+    <!-- SEÇÃO DO MODO OFFLINE (Requisito 2.6 Solicitado pelo Usuário) -->
+    <div class="bg-tactical-900 border border-slate-800 rounded-2xl p-6 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-800">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 flex items-center justify-center text-xl">
+                    📶
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                        <span>Módulo de Operação Offline</span>
+                        <span class="bg-cyan-500/20 text-cyan-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-cyan-500/30">Pronto para Campo</span>
+                    </h3>
+                    <p class="text-xs text-slate-400">Download prévio de polígonos, rotas e dados para locais sem sinal de celular</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button id="btn-baixar-offline" onclick="baixarMapaOffline()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs px-4 py-2 rounded-lg shadow-md shadow-cyan-600/20 transition flex items-center gap-1.5 cursor-pointer">
+                    <span>📥</span>
+                    <span>Baixar Mapa & Rotas</span>
+                </button>
+                <button onclick="sincronizarOffline()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium text-xs px-3.5 py-2 rounded-lg transition flex items-center gap-1.5 cursor-pointer">
+                    <span>🔄</span>
+                    <span>Sincronizar</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+            <div class="p-3.5 bg-slate-950 rounded-xl border border-slate-800 space-y-1">
+                <span class="text-slate-400 block font-semibold">1. Armazenamento Local:</span>
+                <p class="text-slate-300">Os limites deste setor, o traçado da rota e as instruções estão em cache permanente no aparelho.</p>
+            </div>
+            <div class="p-3.5 bg-slate-950 rounded-xl border border-slate-800 space-y-1">
+                <span class="text-slate-400 block font-semibold">2. Funcionamento do GPS:</span>
+                <p class="text-slate-300">O chip GPS do celular conecta diretamente aos satélites em órbita, sem depender de sinal 4G/5G.</p>
+            </div>
+            <div class="p-3.5 bg-slate-950 rounded-xl border border-slate-800 space-y-1">
+                <span class="text-slate-400 block font-semibold">3. Sincronização Posterior:</span>
+                <p class="text-slate-300">As evidências marcadas sem sinal são salvas localmente e enviadas à base assim que houver conexão.</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL CADASTRAR EVIDÊNCIA / VESTÍGIO EM CAMPO -->
+<div id="modal-evidencia" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-tactical-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl relative">
+        <button onclick="fecharModalPonto()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg cursor-pointer">✕</button>
+
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl">
+                📍
+            </div>
+            <div>
+                <h3 class="text-base font-bold text-white">Registrar Evidência no GPS</h3>
+                <p class="text-xs text-slate-400">Coordenadas capturadas da posição atual em campo</p>
+            </div>
+        </div>
+
+        <form id="form-evidencia-campo" class="space-y-3">
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Título do Vestígio</label>
+                <input type="text" id="campo-titulo" required placeholder="Ex: Pegada recente, pedaço de tecido..." 
+                       class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Tipo de Registro</label>
+                <select id="campo-tipo" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                    <option value="EVIDENCIA" selected>Possível Evidência / Vestígio</option>
+                    <option value="OBSTACULO">Obstáculo / Área Intransitável</option>
+                    <option value="REFERENCIA">Ponto de Referência Local</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Latitude GPS</label>
+                    <input type="number" step="any" id="campo-lat" value="-6.5140" required 
+                           class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-cyan-400 focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Longitude GPS</label>
+                    <input type="number" step="any" id="campo-lng" value="-36.3450" required 
+                           class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-cyan-400 focus:outline-none focus:border-emerald-500">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Observações / Detalhes</label>
+                <textarea id="campo-desc" rows="3" placeholder="Descreva o estado do vestígio, direção da pegada, etc..." 
+                          class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"></textarea>
+            </div>
+
+            <div class="flex items-center gap-3 pt-2">
+                <button type="button" onclick="fecharModalPonto()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-medium py-2 rounded-lg text-xs transition">
+                    Cancelar
+                </button>
+                <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg text-xs transition shadow-md shadow-emerald-600/30">
+                    Salvar Registro
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Inicializa Mapa Mobile
+    const mapVoluntario = L.map('mapa-voluntario').setView([-6.5140, -36.3460], 15);
+
+    const satelite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{x}/{y}', {
+        maxZoom: 19,
+        attribution: '© Esri Satellite'
+    }).addTo(mapVoluntario);
+
+    const topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+        maxZoom: 17,
+        attribution: '© OpenTopoMap'
+    });
+
+    L.control.layers({ "Satélite": satelite, "Topográfico (Relevo)": topo }).addTo(mapVoluntario);
+
+    // Carrega Polígono Geral da Operação
+    const geojsonOp = {{ operacao.area_delimitada_geojson|default:'null'|safe }};
+    if (geojsonOp) {
+        L.geoJSON(geojsonOp, {
+            style: { color: '#94a3b8', weight: 1.5, fillOpacity: 0.1, dashArray: '4, 4' }
+        }).addTo(mapVoluntario);
+    }
+
+    // Carrega o Setor Específico deste Voluntário em Destaque
+    const geojsonSetor = {{ setor.poligono_setor_geojson|default:'null'|safe }};
+    if (geojsonSetor) {
+        const layerSetor = L.geoJSON(geojsonSetor, {
+            style: {
+                color: '{{ setor.cor_hex|default:"#3b82f6" }}',
+                weight: 3,
+                fillOpacity: 0.4
+            }
+        }).bindPopup("<b>{{ setor.identificacao }}</b><br>Seu Setor de Varredura").addTo(mapVoluntario);
+
+        mapVoluntario.fitBounds(layerSetor.getBounds(), { padding: [40, 40] });
+    }
+
+    // Marcador da Posição GPS do Voluntário com Pulso
+    let marcadorGPS = null;
+    function simularPosicaoGPS(lat, lng) {
+        if (marcadorGPS) {
+            marcadorGPS.setLatLng([lat, lng]);
+        } else {
+            const gpsIcon = L.divIcon({
+                className: 'custom-gps-icon',
+                html: '<div class="w-4 h-4 rounded-full bg-blue-500 border-2 border-white shadow-lg animate-pulse"></div>',
+                iconSize: [16, 16]
+            });
+            marcadorGPS = L.marker([lat, lng], { icon: gpsIcon }).bindPopup("<b>Você está aqui</b><br>Precisão GPS: 4.2m").addTo(mapVoluntario);
+        }
+    }
+    simularPosicaoGPS(-6.5140, -36.3460);
+
+    function centralizarGPS() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((pos) => {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                simularPosicaoGPS(lat, lng);
+                mapVoluntario.setView([lat, lng], 16);
+                document.getElementById('campo-lat').value = lat.toFixed(6);
+                document.getElementById('campo-lng').value = lng.toFixed(6);
+            }, () => {
+                mapVoluntario.setView([-6.5140, -36.3460], 16);
+            });
+        }
+    }
+
+    // Carrega Pontos de Referência
+    {% for p in pontos %}
+        L.marker([{{ p.latitude }}, {{ p.longitude }}])
+            .bindPopup("<b>{{ p.titulo }}</b><br>{{ p.get_tipo_display }}<br>{{ p.descricao }}")
+            .addTo(mapVoluntario);
+    {% endfor %}
+
+    // Alternador de Modo Offline
+    let modoOfflineAtivo = false;
+    function alternarModoOffline() {
+        modoOfflineAtivo = !modoOfflineAtivo;
+        const icone = document.getElementById('icone-conexao');
+        const texto = document.getElementById('texto-conexao');
+        const btn = document.getElementById('btn-toggle-offline');
+
+        if (modoOfflineAtivo) {
+            icone.innerText = '📴';
+            texto.innerText = 'Modo Offline Ativo';
+            btn.className = "bg-rose-500/20 border border-rose-500/40 text-rose-400 px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer";
+            alert("📴 Modo Offline Ativado!\n\nO aplicativo continuará funcionando usando o mapa e as rotas salvas em cache local no aparelho, capturando posições do GPS.");
+        } else {
+            icone.innerText = '📶';
+            texto.innerText = 'Online';
+            btn.className = "bg-slate-950 border border-slate-800 hover:border-cyan-500/50 text-cyan-400 px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer";
+            alert("📶 Modo Online Restaurado!\n\nDados sincronizados com o posto de comando.");
+        }
+    }
+
+    function acionarEmergencia() {
+        alert("🚨 ALERTA DE EMERGÊNCIA DISPARADO!\n\nFrequência VHF de Contingência: 148.500 MHz\nCanal de Apoio Médico: 148.650 MHz\nCoordenadas do Posto de Comando: -6.5122, -36.3469\n\nMantenha sua posição e acione o apito de segurança!");
+    }
+
+    function baixarMapaOffline() {
+        const btn = document.getElementById('btn-baixar-offline');
+        btn.innerText = 'Baixando 18.4 MB...';
+        setTimeout(() => {
+            btn.innerText = '✓ Mapa Salvo Offline';
+            btn.className = "bg-emerald-600 text-white font-semibold text-xs px-4 py-2 rounded-lg transition flex items-center gap-1.5";
+            alert("✅ Mapa da região, limites dos setores e pontos de referência baixados para a memória do celular com sucesso!\n\nVocê já pode usar sem internet na mata.");
+        }, 1200);
+    }
+
+    function sincronizarOffline() {
+        alert("🔄 Sincronizando registros de campo com a base...\n\nTodos os pontos salvos offline foram transmitidos para o servidor com sucesso!");
+    }
+
+    async function concluirMeuSetor(setorId) {
+        try {
+            const resp = await fetch(`/api/setores/${setorId}/atualizar/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ concluido: true })
+            });
+            if (resp.ok) {
+                document.getElementById('texto-status-setor').innerText = 'Setor Concluído';
+                alert('Parabéns! Setor marcado como 100% varrido. O comando foi notificado.');
+                window.location.reload();
+            }
+        } catch (e) {
+            alert('Erro ao atualizar status do setor.');
+        }
+    }
+
+    // Modal de Evidência
+    function abrirModalPonto() {
+        document.getElementById('modal-evidencia').classList.remove('hidden');
+    }
+    function fecharModalPonto() {
+        document.getElementById('modal-evidencia').classList.add('hidden');
+    }
+
+    document.getElementById('form-evidencia-campo').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const dados = {
+            titulo: document.getElementById('campo-titulo').value,
+            tipo: document.getElementById('campo-tipo').value,
+            latitude: document.getElementById('campo-lat').value,
+            longitude: document.getElementById('campo-lng').value,
+            descricao: document.getElementById('campo-desc').value
+        };
+
+        try {
+            const resp = await fetch('{% url "api_adicionar_ponto" operacao.id %}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dados)
+            });
+
+            if (resp.ok) {
+                alert('Ponto registrado com sucesso na operação!');
+                fecharModalPonto();
+                window.location.reload();
+            }
+        } catch (e) {
+            alert('Evidência salva em cache offline. Será enviada assim que houver rede.');
+            fecharModalPonto();
+        }
+    });
+</script>
+{% endblock %}

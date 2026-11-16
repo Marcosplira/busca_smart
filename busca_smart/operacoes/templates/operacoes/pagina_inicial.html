@@ -1,0 +1,419 @@
+{% extends 'operacoes/base.html' %}
+{% load static %}
+
+{% block title %}BuscaSmart — Sistema de Gestão Inteligente de Buscas e Salvamento (SAR){% endblock %}
+
+{% block content %}
+<div class="space-y-16 max-w-7xl mx-auto pb-12">
+
+    <!-- HERO SECTION DE ALTO IMPACTO COMERCIAL (Com a Foto dos Socorristas em Campo) -->
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-tactical-900 via-slate-900 to-slate-950 border border-slate-800 shadow-2xl p-8 md:p-12">
+        <!-- Elemento de Fundo Luminoso Tático -->
+        <div class="absolute -top-32 -right-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <!-- Coluna de Texto e Apresentação Comercial -->
+            <div class="lg:col-span-7 space-y-6">
+                <div class="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 px-3.5 py-1.5 rounded-full text-xs font-bold text-emerald-400 uppercase tracking-wider shadow-sm">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span>Sistema de Gestão Inteligente de Buscas • SAR</span>
+                </div>
+
+                <div class="space-y-2">
+                    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
+                        BuscaSmart
+                    </h1>
+                    <p class="text-lg sm:text-xl font-medium text-emerald-400">
+                        Tecnologia Geoespacial e Inteligência Artificial para Salvar Vidas em Campo
+                    </p>
+                </div>
+
+                <p class="text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl">
+                    Uma plataforma profissional para <strong>delimitar áreas geográficas</strong>, <strong>dividir territórios entre equipes</strong>, <strong>gerar rotas táticas</strong> e <strong>acompanhar o andamento das operações em tempo real</strong> — inclusive em regiões remotas e <strong>sem sinal de internet</strong>.
+                </p>
+
+                <!-- Botões de Ação Imediata (CTAs) -->
+                <div class="flex flex-wrap items-center gap-4 pt-2">
+                    <a href="{% url 'dashboard' %}" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm px-6 py-3.5 rounded-xl shadow-lg shadow-emerald-600/30 flex items-center gap-2.5 transition transform hover:-translate-y-0.5">
+                        <span>📊</span>
+                        <span>Acessar Painel do Coordenador</span>
+                    </a>
+
+                    <a href="{% url 'painel_mapa' %}" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-sm px-5 py-3.5 rounded-xl flex items-center gap-2 transition">
+                        <span>🗺️</span>
+                        <span>Abrir Mapa de Delimitação</span>
+                    </a>
+
+                    <a href="{% url 'chat_ia' %}" class="bg-slate-900/90 hover:bg-slate-800 text-slate-300 border border-slate-800 font-semibold text-sm px-4 py-3.5 rounded-xl flex items-center gap-2 transition">
+                        <span>🤖</span>
+                        <span>Assistente IA</span>
+                    </a>
+                </div>
+
+                <!-- Métricas Rápidas de Impacto -->
+                <div class="pt-6 border-t border-slate-800/80 grid grid-cols-3 gap-4 text-xs">
+                    <div>
+                        <strong class="text-xl font-extrabold text-white block">{{ total_operacoes }}</strong>
+                        <span class="text-slate-400">Missões Cadastradas</span>
+                    </div>
+                    <div>
+                        <strong class="text-xl font-extrabold text-emerald-400 block">{{ area_total_km2 }} km²</strong>
+                        <span class="text-slate-400">Área Georreferenciada</span>
+                    </div>
+                    <div>
+                        <strong class="text-xl font-extrabold text-cyan-400 block">{{ total_setores }}</strong>
+                        <span class="text-slate-400">Setores Táticos</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coluna da Foto Hero dos Socorristas em Campo -->
+            <div class="lg:col-span-5 relative">
+                <div class="relative rounded-2xl overflow-hidden border-2 border-slate-700/80 shadow-2xl group">
+                    <img src="{% static 'operacoes/img/hero_sar_rescue.png' %}" 
+                         alt="Equipe de Busca e Salvamento em Campo" 
+                         class="w-full h-80 sm:h-96 object-cover object-center group-hover:scale-105 transition duration-700">
+                    
+                    <!-- Gradiente escuro sobre a imagem -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+
+                    <!-- Badge Flutuante na Foto -->
+                    <div class="absolute bottom-4 left-4 right-4 bg-slate-900/90 backdrop-blur-md border border-slate-700 p-3.5 rounded-xl">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></span>
+                                <span class="text-xs font-bold text-white">Operações SAR em Tempo Real</span>
+                            </div>
+                            <span class="text-[10px] bg-orange-500/20 text-orange-400 font-bold px-2 py-0.5 rounded border border-orange-500/30">Mata & Caatinga</span>
+                        </div>
+                        <p class="text-[11px] text-slate-300 mt-1">Sincronização imediata entre o mapa do comando e o celular dos voluntários.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- O CENÁRIO REALISTA DE APLICAÇÃO: O CASE DE PICUÍ - PB -->
+    <div class="bg-tactical-900 border border-slate-800 rounded-3xl p-8 md:p-12 shadow-sm space-y-8">
+        <div class="max-w-3xl space-y-3">
+            <span class="text-xs font-bold text-orange-400 uppercase tracking-wider block">Estudo de Caso Operacional</span>
+            <h2 class="text-2xl md:text-3xl font-extrabold text-white">
+                Como o BuscaSmart atua na prática: O Caso de Picuí - PB
+            </h2>
+            <p class="text-sm text-slate-300 leading-relaxed">
+                Imagine a seguinte situação: Uma pessoa desapareceu em uma região rural de Picuí - PB. A equipe de busca precisa percorrer uma área estimada de aproximadamente <strong>10 km²</strong> de mata fechada e terreno pedregoso.
+            </p>
+            <p class="text-xs text-slate-400 leading-relaxed">
+                O responsável pela operação abre o BuscaSmart no computador ou tablet de campo, delimita o perímetro da região no mapa e informa que existem <strong>20 voluntários disponíveis</strong> para a missão.
+            </p>
+        </div>
+
+        <!-- Fluxo Passo a Passo em 8 Etapas Automáticas -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+            <!-- Passo 1 -->
+            <div class="bg-slate-950 border border-slate-800/90 rounded-2xl p-5 space-y-2 hover:border-emerald-500/40 transition">
+                <span class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">1</span>
+                <h4 class="text-sm font-bold text-white">Reconhece o Perímetro</h4>
+                <p class="text-xs text-slate-400 leading-relaxed">Identifica os vértices do polígono desenhado sobre a imagem de satélite em alta resolução.</p>
+            </div>
+
+            <!-- Passo 2 -->
+            <div class="bg-slate-950 border border-slate-800/90 rounded-2xl p-5 space-y-2 hover:border-emerald-500/40 transition">
+                <span class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">2</span>
+                <h4 class="text-sm font-bold text-white">Calcula a Extensão</h4>
+                <p class="text-xs text-slate-400 leading-relaxed">Calcula automaticamente a área exata em hectares (ha) e quilômetros quadrados (km²) via Turf.js.</p>
+            </div>
+
+            <!-- Passo 3 -->
+            <div class="bg-slate-950 border border-slate-800/90 rounded-2xl p-5 space-y-2 hover:border-emerald-500/40 transition">
+                <span class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">3</span>
+                <h4 class="text-sm font-bold text-white">Divide em 20 Setores</h4>
+                <p class="text-xs text-slate-400 leading-relaxed">Gera 20 faixas e quadrantes de busca geometricamente balanceadas e coloridas no mapa.</p>
+            </div>
+
+            <!-- Passo 4 -->
+            <div class="bg-slate-950 border border-slate-800/90 rounded-2xl p-5 space-y-2 hover:border-emerald-500/40 transition">
+                <span class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">4</span>
+                <h4 class="text-sm font-bold text-white">Organiza as Rotas</h4>
+                <p class="text-xs text-slate-400 leading-relaxed">Define a ordem de varredura (linhas paralelas ou leque) para cada voluntário ou dupla.</p>
+            </div>
+
+            <!-- Passo 5 -->
+            <div class="bg-slate-950 border border-slate-800/90 rounded-2xl p-5 space-y-2 hover:border-emerald-500/40 transition">
+                <span class="w-7 h-7 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs">5</span>
+                <h4 class="text-sm font-bold text-white">Identificação Nominal</h4>
+                <p class="text-xs text-slate-400 leading-relaxed">Nomeia cada frente: <em>Setor 01 — Júnior</em>, <em>Setor 02 — Marcos Paulo</em>, <em>Setor 03 — Pedro</em>...</p>
+            </div>
+
+            <!-- Passo 6 -->
+            <div class="bg-slate-950 border border-slate-800/90 rounded-2xl p-5 space-y-2 hover:border-emerald-500/40 transition">
+                <span class="w-7 h-7 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs">6</span>
+                <h4 class="text-sm font-bold text-white">Compartilha em 1 Clique</h4>
+                <p class="text-xs text-slate-400 leading-relaxed">Gera código <code>BUSCA-XXXXXX</code> e QR Code para que as equipes recebam seus setores no celular.</p>
+            </div>
+
+            <!-- Passo 7 -->
+            <div class="bg-slate-950 border border-slate-800/90 rounded-2xl p-5 space-y-2 hover:border-cyan-500/40 transition">
+                <span class="w-7 h-7 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs">7</span>
+                <h4 class="text-sm font-bold text-white">Modo 100% Offline</h4>
+                <p class="text-xs text-slate-400 leading-relaxed">Permite baixar o mapa da região e operar sem internet direto pelo GPS do dispositivo.</p>
+            </div>
+
+            <!-- Passo 8 -->
+            <div class="bg-slate-950 border border-slate-800/90 rounded-2xl p-5 space-y-2 hover:border-cyan-500/40 transition">
+                <span class="w-7 h-7 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs">8</span>
+                <h4 class="text-sm font-bold text-white">Registro de Evidências</h4>
+                <p class="text-xs text-slate-400 leading-relaxed">Registra pontos LKP, pegadas, obstáculos e gera relatório oficial para Bombeiros e Defesa Civil.</p>
+            </div>
+        </div>
+
+        <!-- Tabela Exemplo de Atribuição Nominal -->
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <div>
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                        <span>📋</span>
+                        <span>Exemplo de Escala Nominal Gerada pelo BuscaSmart</span>
+                    </h3>
+                    <p class="text-xs text-slate-400">Atribuição tática imediata para 20 participantes em campo</p>
+                </div>
+                <a href="{% url 'gerenciar_equipe' %}" class="text-xs text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1">
+                    Abrir Módulo de Equipes →
+                </a>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 text-xs">
+                <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                    <span class="text-emerald-400 font-bold block">Rota 01</span>
+                    <strong class="text-white text-xs">Júnior</strong>
+                </div>
+                <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                    <span class="text-blue-400 font-bold block">Rota 02</span>
+                    <strong class="text-white text-xs">Marcos Paulo</strong>
+                </div>
+                <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                    <span class="text-amber-400 font-bold block">Rota 03</span>
+                    <strong class="text-white text-xs">Pedro</strong>
+                </div>
+                <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                    <span class="text-rose-400 font-bold block">Rota 04</span>
+                    <strong class="text-white text-xs">João</strong>
+                </div>
+                <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                    <span class="text-purple-400 font-bold block">Rota 05</span>
+                    <strong class="text-white text-xs">Carlos</strong>
+                </div>
+            </div>
+            <p class="text-[11px] text-slate-500 italic mt-3">Os demais 15 participantes recebem os setores subsequentes (Setor 06 ao 20) com instruções específicas.</p>
+        </div>
+    </div>
+
+    <!-- OS 8 MÓDULOS PRINCIPAIS SOLICITADOS -->
+    <div class="space-y-8">
+        <div class="text-center max-w-2xl mx-auto space-y-2">
+            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Arquitetura Modular Completa</span>
+            <h2 class="text-2xl md:text-3xl font-extrabold text-white">Os 8 Módulos do BuscaSmart</h2>
+            <p class="text-xs text-slate-400">Desenvolvido sob medida para atender às demandas de coordenadores e brigadistas em missões críticas.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Módulo 1 -->
+            <div class="bg-tactical-900 border border-slate-800 rounded-2xl p-6 hover:border-emerald-500/50 transition space-y-3">
+                <div class="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-xl text-emerald-400">
+                    🗺️
+                </div>
+                <h3 class="text-base font-bold text-white">1. Mapa Inteligente</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    Pesquisa de localização, satélite em alta definição e desenho manual de polígonos para fixar o perímetro da busca.
+                </p>
+            </div>
+
+            <!-- Módulo 2 -->
+            <div class="bg-tactical-900 border border-slate-800 rounded-2xl p-6 hover:border-emerald-500/50 transition space-y-3">
+                <div class="w-12 h-12 rounded-xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-xl text-blue-400">
+                    ⚡
+                </div>
+                <h3 class="text-base font-bold text-white">2. Divisão Automática</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    Algoritmo computacional que corta o polígono em setores proporcionais ao número exato de voluntários disponíveis.
+                </p>
+            </div>
+
+            <!-- Módulo 3 -->
+            <div class="bg-tactical-900 border border-slate-800 rounded-2xl p-6 hover:border-emerald-500/50 transition space-y-3">
+                <div class="w-12 h-12 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-xl text-cyan-400">
+                    ✏️
+                </div>
+                <h3 class="text-base font-bold text-white">3. Rotas Manuais</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    Liberdade total para o coordenador ajustar vértices, desenhar trajetos alternativos e contornar barreiras no terreno.
+                </p>
+            </div>
+
+            <!-- Módulo 4 -->
+            <div class="bg-tactical-900 border border-slate-800 rounded-2xl p-6 hover:border-emerald-500/50 transition space-y-3">
+                <div class="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-xl text-amber-400">
+                    📐
+                </div>
+                <h3 class="text-base font-bold text-white">4. Rotas Automáticas</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    Geração de trajetos de varredura por algoritmos de linhas paralelas, cobrindo 100% da área sem deixar pontos cegos.
+                </p>
+            </div>
+
+            <!-- Módulo 5 -->
+            <div class="bg-tactical-900 border border-slate-800 rounded-2xl p-6 hover:border-emerald-500/50 transition space-y-3">
+                <div class="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-xl text-emerald-400">
+                    🤖
+                </div>
+                <h3 class="text-base font-bold text-white">5. Inteligência Artificial</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    Assistente conversacional tático e gerador de resumos executivos com sugestões de alocação e análise de risco SAR.
+                </p>
+            </div>
+
+            <!-- Módulo 6 -->
+            <div class="bg-tactical-900 border border-slate-800 rounded-2xl p-6 hover:border-emerald-500/50 transition space-y-3">
+                <div class="w-12 h-12 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-xl text-purple-400">
+                    🏷️
+                </div>
+                <h3 class="text-base font-bold text-white">6. Identificação Nominal</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    Nomeação clara de cada setor com o responsável, evitando sobreposição de esforços e mantendo a cadeia de custódia.
+                </p>
+            </div>
+
+            <!-- Módulo 7 -->
+            <div class="bg-tactical-900 border border-slate-800 rounded-2xl p-6 hover:border-emerald-500/50 transition space-y-3">
+                <div class="w-12 h-12 rounded-xl bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-xl text-orange-400">
+                    📡
+                </div>
+                <h3 class="text-base font-bold text-white">7. Compartilhamento</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    Distribuição das operações por código exclusivo e QR Code, com registro de versão para impedir uso de mapa desatualizado.
+                </p>
+            </div>
+
+            <!-- Módulo 8 -->
+            <div class="bg-tactical-900 border border-slate-800 rounded-2xl p-6 hover:border-emerald-500/50 transition space-y-3">
+                <div class="w-12 h-12 rounded-xl bg-teal-500/15 border border-teal-500/30 flex items-center justify-center text-xl text-teal-400">
+                    📶
+                </div>
+                <h3 class="text-base font-bold text-white">8. Modo Offline</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    Download antecipado dos mapas e polígonos para navegação confiável por GPS em gargantas, vales e zonas sem rede celular.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- DIFERENCIAL TÉCNICO: CRIAÇÃO DE ROTAS INTELIGENTES -->
+    <div class="bg-gradient-to-r from-tactical-900 via-slate-900 to-tactical-950 border border-slate-800 rounded-3xl p-8 md:p-12 shadow-sm space-y-6">
+        <div class="max-w-3xl space-y-3">
+            <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider block">Observação Técnica Fundamental</span>
+            <h2 class="text-2xl font-bold text-white">
+                Mais do que dividir em partes iguais: Inteligência Geográfica de Campo
+            </h2>
+            <p class="text-sm text-slate-300 leading-relaxed">
+                Não basta cortar o mapa em retângulos idênticos. Uma operação real exige que o algoritmo leve em consideração <strong>vegetação densa</strong>, <strong>relevo acidentado</strong>, <strong>barreiras fluviais</strong>, <strong>estradas vicinais</strong> e a <strong>dificuldade física do terreno</strong>.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+            <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-2">
+                <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider block">Modalidade 1</span>
+                <h4 class="text-sm font-bold text-white">Rotas Manuais</h4>
+                <p class="text-xs text-slate-400 leading-relaxed">O coordenador desenha a linha de busca livremente no mapa conforme o conhecimento local dos guias da região.</p>
+            </div>
+
+            <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-2">
+                <span class="text-xs font-bold text-blue-400 uppercase tracking-wider block">Modalidade 2</span>
+                <h4 class="text-sm font-bold text-white">Rotas Automáticas</h4>
+                <p class="text-xs text-slate-400 leading-relaxed">O sistema calcula trajetos geométricos otimizados e distribui as faixas de varredura entre as equipes.</p>
+            </div>
+
+            <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-2">
+                <span class="text-xs font-bold text-purple-400 uppercase tracking-wider block">Modalidade 3</span>
+                <h4 class="text-sm font-bold text-white">Rotas Assistidas por IA</h4>
+                <p class="text-xs text-slate-400 leading-relaxed">O motor de IA sugere a organização das rotas baseando-se no Último Ponto Visto (LKP) e na telemetria SAR.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- GALERIA DE TELAS & TÁTICAS SAR (Com as Fotos e Grids Enviados pelo Usuário) -->
+    <div class="space-y-6">
+        <div>
+            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider block">Demonstração Visual</span>
+            <h2 class="text-2xl font-bold text-white">Tecnologias e Padrões de Varredura Integrados</h2>
+            <p class="text-xs text-slate-400 mt-1">Conceitos operacionais reais de Busca e Resgate (SAR) integrados na plataforma BuscaSmart.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Card Imagem 1: Grid e Evidências -->
+            <div class="bg-tactical-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm group">
+                <div class="h-48 overflow-hidden bg-slate-950">
+                    <img src="{% static 'operacoes/img/grid_sectors_evidence.jpg' %}" 
+                         alt="Malha de Varredura e Evidências" 
+                         class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                </div>
+                <div class="p-5 space-y-2">
+                    <h4 class="text-sm font-bold text-white">Grid Tático & Evidências</h4>
+                    <p class="text-xs text-slate-400 leading-relaxed">Divisão em células numeradas com registro de pegadas, vestígios e vetores de entrada de busca.</p>
+                </div>
+            </div>
+
+            <!-- Card Imagem 2: SARTOPO / Planejador -->
+            <div class="bg-tactical-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm group">
+                <div class="h-48 overflow-hidden bg-slate-950">
+                    <img src="{% static 'operacoes/img/sartopo_mission_planner.jpg' %}" 
+                         alt="Planejador SARTOPO de Missão" 
+                         class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                </div>
+                <div class="p-5 space-y-2">
+                    <h4 class="text-sm font-bold text-white">Planejamento de Missão SAR</h4>
+                    <p class="text-xs text-slate-400 leading-relaxed">Registro de Posto de Comando (ICP), Último Ponto Visto (LKP) e designação de equipes.</p>
+                </div>
+            </div>
+
+            <!-- Card Imagem 3: Mobile e Curvas de Nível -->
+            <div class="bg-tactical-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm group">
+                <div class="h-48 overflow-hidden bg-slate-950">
+                    <img src="{% static 'operacoes/img/mobile_contours_radius.jpg' %}" 
+                         alt="Raio LKP e Curvas de Nível" 
+                         class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                </div>
+                <div class="p-5 space-y-2">
+                    <h4 class="text-sm font-bold text-white">Raio de Busca & Altimetria</h4>
+                    <p class="text-xs text-slate-400 leading-relaxed">Definição de raio de probabilidade concêntrico e acompanhamento por relevo topográfico.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHAMADA FINAL / ACESSO DIRETO AO SISTEMA -->
+    <div class="bg-gradient-to-r from-emerald-950/60 via-tactical-900 to-slate-900 border border-emerald-500/40 rounded-3xl p-8 md:p-12 text-center space-y-6 shadow-xl">
+        <div class="max-w-2xl mx-auto space-y-3">
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white">
+                Pronto para coordenar ou simular sua primeira operação?
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-300">
+                Acesse o painel do coordenador, delimite o perímetro da busca no mapa ou converse com o assistente tático de IA.
+            </p>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-center gap-4">
+            <a href="{% url 'dashboard' %}" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm px-8 py-3.5 rounded-xl shadow-lg shadow-emerald-600/30 transition transform hover:-translate-y-0.5">
+                Ir para o Dashboard Geral
+            </a>
+            <a href="{% url 'painel_mapa' %}" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-sm px-6 py-3.5 rounded-xl transition">
+                Delimitar no Mapa
+            </a>
+            <a href="{% url 'chat_ia' %}" class="bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-semibold text-sm px-6 py-3.5 rounded-xl transition">
+                Conversar com a IA
+            </a>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

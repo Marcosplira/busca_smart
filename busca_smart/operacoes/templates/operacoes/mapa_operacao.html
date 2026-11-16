@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuscaSmart — Planejamento Tático de Área e Setores</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Leaflet Draw (Ferramenta de Desenho) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+    <!-- Turf.js (Cálculo Geográfico de Área) -->
+    <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+</head>
+
+<body class="bg-slate-950 text-slate-100 h-screen flex flex-col overflow-hidden font-sans">
+
+    <!-- Barra Superior Tática -->
+    <header class="bg-slate-900 border-b border-slate-800 px-6 py-3 flex flex-wrap items-center justify-between gap-4 shadow-md z-10">
+        <div class="flex items-center gap-4">
+            <a href="{% url 'dashboard' %}" class="text-xs text-slate-400 hover:text-white flex items-center gap-1.5 transition bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                <span>←</span>
+                <span>Dashboard</span>
+            </a>
+            <div class="flex items-center gap-2">
+                <span class="bg-emerald-600 text-white font-extrabold px-2.5 py-1 rounded text-xs tracking-wider">BUSCASMART</span>
+                <h1 class="text-sm md:text-base font-bold text-slate-200">
+                    {% if operacao_atual %}
+                        {{ operacao_atual.nome }} ({{ operacao_atual.codigo_convite }})
+                    {% else %}
+                        Delimitação de Perímetro Operacional SAR
+                    {% endif %}
+                </h1>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div class="bg-slate-950 px-4 py-1.5 rounded-lg border border-slate-800 text-xs">
+                <span class="text-slate-400">Área Delimitada:</span>
+                <strong id="area-display" class="text-emerald-400 ml-1">
+                    {% if operacao_atual %}{{ operacao_atual.area_total_km2 }} km²{% else %}0.00 ha (0.00 km²){% endif %}
+                </strong>
+            </div>
+
+            <a href="{% url 'gerenciar_equipe' %}" class="hidden sm:inline-flex bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium px-3.5 py-1.5 rounded-lg border border-slate-700 transition">
+                👥 Equipes
+            </a>
+
+            <a href="{% url 'chat_ia' %}" class="hidden sm:inline-flex bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium px-3.5 py-1.5 rounded-lg border border-slate-700 transition">
+                🤖 Chat IA
+            </a>
+
+            <button id="btn-salvar" disabled
+                class="bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 disabled:text-slate-500 text-white font-semibold px-4 py-1.5 rounded-lg text-xs transition cursor-pointer shadow-md shadow-emerald-600/20">
+                Salvar Operação e Setores
+            </button>
+        </div>
+    </header>
+
+    <!-- Área Principal (Sidebar + Mapa) -->
+    <div class="flex-1 flex relative">
+
+        <!-- Painel Lateral de Controle -->
+        <aside class="w-80 bg-slate-900 border-r border-slate-800 p-5 flex flex-col gap-4 z-10 overflow-y-auto">
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Nome da Operação</label>
+                <input type="text" id="nome-operacao" value="{% if operacao_atual %}{{ operacao_atual.nome }}{% endif %}" placeholder="Ex: Busca Serra do Curimataú"
+                    class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Participantes / Equipes</label>
+                <input type="number" id="qtd-participantes" value="4" min="1" max="50"
+                    class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                <button id="btn-gerar-setores"
+                    class="mt-2.5 w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-medium py-2 rounded-lg text-xs transition cursor-pointer flex items-center justify-center gap-1.5">
+                    <span>⚡</span>
+                    <span>Dividir Setores Automaticamente</span>
+                </button>
+                <p class="text-[11px] text-slate-400 mt-1">Corta a área em faixas verticais balanceadas via algoritmo geográfico Turf.js.</p>
+            </div>
+
+            <!-- Instruções SAR -->
+            <div class="bg-slate-950 border border-slate-800 rounded-lg p-3.5 text-xs text-slate-300 space-y-2">
+                <p class="font-bold text-emerald-400 flex items-center gap-1">
+                    <span>📌</span>
+                    <span>Como delimitar a busca:</span>
+                </p>
+                <ol class="list-decimal list-inside space-y-1 text-slate-400 text-[11px]">
+                    <li>Clique no ícone de <strong>polígono</strong> ou <strong>retângulo</strong> no canto superior esquerdo do mapa.</li>
+                    <li>Desenhe o perímetro ao redor da área de interesse para calcular os hectares.</li>
+                    <li>Clique em <strong>Dividir Setores</strong> para distribuir entre as equipes.</li>
+                    <li>Adicione marcadores para <strong>Base (ICP)</strong> ou <strong>LKP</strong>.</li>
+                </ol>
+            </div>
+
+            <!-- Resumo dos Setores Gerados -->
+            <div id="painel-setores-info" class="space-y-1.5 hidden">
+                <span class="block text-xs font-semibold uppercase tracking-wider text-slate-400">Setores Calculados:</span>
+                <div id="lista-setores-gerados" class="space-y-1 max-h-36 overflow-y-auto pr-1"></div>
+            </div>
+
+            <!-- Saída GeoJSON para conferência -->
+            <div class="mt-auto pt-2">
+                <span class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">GeoJSON Capturado</span>
+                <pre id="geojson-output"
+                    class="bg-slate-950 border border-slate-800 rounded p-2 text-[10px] text-slate-400 h-28 overflow-auto font-mono">Aguardando desenho...</pre>
+            </div>
+        </aside>
+
+        <!-- Container do Mapa -->
+        <main id="map" class="flex-1 h-full z-0 bg-slate-950"></main>
+    </div>
+
+    <script>
+        // 1. Inicializa o mapa (Picuí - PB como centro de referência regional)
+        const map = L.map('map').setView([-6.5122, -36.3469], 14);
+
+        // Camadas de Mapa
+        const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        });
+
+        const satelite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{x}/{y}', {
+            maxZoom: 19,
+            attribution: '© Esri Satellite'
+        });
+
+        satelite.addTo(map);
+        L.control.layers({ "Satélite Tático": satelite, "Mapa de Ruas": osm }).addTo(map);
+
+        // 2. Ferramentas de Desenho
+        const drawnItems = new L.FeatureGroup();
+        map.addLayer(drawnItems);
+
+        const drawControl = new L.Control.Draw({
+            edit: { featureGroup: drawnItems },
+            draw: {
+                polygon: {
+                    allowIntersection: false,
+                    shapeOptions: { color: '#10b981', fillOpacity: 0.25 }
+                },
+                polyline: true,
+                marker: true,
+                circle: false,
+                rectangle: {
+                    shapeOptions: { color: '#10b981', fillOpacity: 0.25 }
+                },
+                circlemarker: false
+            }
+        });
+        map.addControl(drawControl);
+
+        let geojsonAtual = null;
+        let setoresGerados = [];
+        const layerSetores = L.featureGroup().addTo(map);
+
+        // Divisão de Polígono em Setores (Turf.js)
+        function dividirEmSetores(featurePoligono, numParticipantes) {
+            const bbox = turf.bbox(featurePoligono);
+            const minX = bbox[0];
+            const minY = bbox[1];
+            const maxX = bbox[2];
+            const maxY = bbox[3];
+
+            const larguraTotal = maxX - minX;
+            const passo = larguraTotal / numParticipantes;
+
+            const setores = [];
+            const paletaCores = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316'];
+
+            for (let i = 0; i < numParticipantes; i++) {
+                const stripMinX = minX + (i * passo);
+                const stripMaxX = stripMinX + passo;
+
+                const faixa = turf.polygon([[
+                    [stripMinX, minY],
+                    [stripMaxX, minY],
+                    [stripMaxX, maxY],
+                    [stripMinX, maxY],
+                    [stripMinX, minY]
+                ]]);
+
+                try {
+                    const intersecao = turf.intersect(featurePoligono, faixa);
+                    if (intersecao) {
+                        intersecao.properties = {
+                            identificacao: `Setor 0${i + 1}`,
+                            cor_hex: paletaCores[i % paletaCores.length]
+                        };
+                        setores.push(intersecao);
+                    }
+                } catch (e) {
+                    console.warn('Corte de setor:', e);
+                }
+            }
+            return setores;
+        }
+
+        // Evento de Criação do Desenho
+        map.on(L.Draw.Event.CREATED, function (event) {
+            const layer = event.layer;
+            drawnItems.addLayer(layer);
+
+            const geojson = layer.toGeoJSON();
+
+            if (event.layerType === 'polygon' || event.layerType === 'rectangle') {
+                geojsonAtual = geojson;
+                const areaMetros = turf.area(geojson);
+                const areaHectares = (areaMetros / 10000).toFixed(2);
+                const areaKm2 = (areaMetros / 1000000).toFixed(2);
+
+                document.getElementById('area-display').innerText = `${areaHectares} ha (${areaKm2} km²)`;
+                document.getElementById('btn-salvar').disabled = false;
+            }
+
+            document.getElementById('geojson-output').innerText = JSON.stringify(geojson, null, 2);
+        });
+
+        // Clique no Botão de Gerar Setores
+        document.getElementById('btn-gerar-setores').addEventListener('click', () => {
+            if (!geojsonAtual) {
+                alert('Desenhe o perímetro da operação primeiro usando a ferramenta de polígono.');
+                return;
+            }
+
+            const numParticipantes = Number(document.getElementById('qtd-participantes').value);
+            if (!Number.isInteger(numParticipantes) || numParticipantes < 1 || numParticipantes > 50) {
+                alert('Informe uma quantidade de participantes entre 1 e 50.');
+                return;
+            }
+
+            try {
+                const novosSetores = dividirEmSetores(geojsonAtual, numParticipantes);
+                if (novosSetores.length === 0) {
+                    alert('Não foi possível dividir o perímetro. Verifique se a área desenhada é válida.');
+                    return;
+                }
+
+                layerSetores.clearLayers();
+                setoresGerados = novosSetores;
+
+                const listaEl = document.getElementById('lista-setores-gerados');
+                listaEl.innerHTML = '';
+                document.getElementById('painel-setores-info').classList.remove('hidden');
+
+                setoresGerados.forEach(setor => {
+                    L.geoJSON(setor, {
+                        style: function (feature) {
+                            return {
+                                color: feature.properties.cor_hex,
+                                weight: 2,
+                                fillOpacity: 0.35
+                            };
+                        }
+                    }).bindPopup(`<b>${setor.properties.identificacao}</b><br>Equipe designada`).addTo(layerSetores);
+
+                    // Adiciona na sidebar
+                    const item = document.createElement('div');
+                    item.className = "flex items-center justify-between text-[11px] p-1.5 rounded bg-slate-950 border border-slate-800";
+                    item.innerHTML = `
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${setor.properties.cor_hex}"></span>
+                            <span class="font-bold text-white">${setor.properties.identificacao}</span>
+                        </div>
+                        <span class="text-slate-400">Pronto para envio</span>
+                    `;
+                    listaEl.appendChild(item);
+                });
+
+            } catch (error) {
+                console.error('Erro ao dividir setores:', error);
+                alert('Erro ao calcular os setores geográficos.');
+            }
+        });
+
+        // Salvar Operação e Setores no Banco de Dados
+        document.getElementById('btn-salvar').addEventListener('click', async () => {
+            const nome = document.getElementById('nome-operacao').value.trim();
+
+            if (!nome) {
+                alert('Por favor, informe o nome da operação.');
+                document.getElementById('nome-operacao').focus();
+                return;
+            }
+
+            if (!geojsonAtual) {
+                alert('Por favor, desenhe a área de busca no mapa primeiro.');
+                return;
+            }
+
+            const areaMetros = turf.area(geojsonAtual);
+            const areaKm2 = parseFloat((areaMetros / 1000000).toFixed(2));
+
+            const dadosOperacao = {
+                nome: nome,
+                descricao: "Operação delimitada via mapa tático BuscaSmart.",
+                area_delimitada_geojson: geojsonAtual,
+                area_total_km2: areaKm2,
+                setores: setoresGerados
+            };
+
+            const btn = document.getElementById('btn-salvar');
+            btn.disabled = true;
+            btn.innerText = 'Salvando no banco...';
+
+            try {
+                const response = await fetch('/api/operacoes/salvar/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dadosOperacao)
+                });
+
+                if (response.ok) {
+                    const res = await response.json();
+                    alert(`✅ Sucesso! Operação salva com sucesso!\n\nCódigo de Convite gerado: ${res.codigo_convite}\nÁrea Total: ${res.area_total_km2} km²\n\nRedirecionando para o Dashboard...`);
+                    window.location.href = '/';
+                } else {
+                    const err = await response.json();
+                    alert(`Erro ao salvar: ${err.erro || 'Falha no servidor.'}`);
+                }
+            } catch (error) {
+                console.error('Erro de conexão:', error);
+                alert('Erro ao conectar com o servidor Django.');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Salvar Operação e Setores';
+            }
+        });
+
+        // Carregamento de Operação Existente (se fornecida via URL)
+        {% if operacao_atual and operacao_atual.area_delimitada_geojson %}
+            try {
+                const geoPreload = {{ operacao_atual.area_delimitada_geojson|safe }};
+                geojsonAtual = geoPreload;
+                const layerExistente = L.geoJSON(geoPreload, {
+                    style: { color: '#10b981', weight: 3, fillOpacity: 0.25 }
+                }).addTo(drawnItems);
+                map.fitBounds(layerExistente.getBounds(), { padding: [30, 30] });
+                document.getElementById('btn-salvar').disabled = false;
+                document.getElementById('geojson-output').innerText = JSON.stringify(geoPreload, null, 2);
+            } catch (e) {
+                console.warn('Falha ao carregar GeoJSON existente:', e);
+            }
+        {% endif %}
+    </script>
+</body>
+
+</html>

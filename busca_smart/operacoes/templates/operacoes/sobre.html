@@ -1,0 +1,184 @@
+{% extends 'operacoes/base.html' %}
+
+{% block title %}Sobre o Projeto — BuscaSmart{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto space-y-12 py-4">
+
+    <!-- Hero / Apresentação Inicial (Inspirado nas Imagens 6 e 7) -->
+    <div class="text-center space-y-4 max-w-3xl mx-auto">
+        <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+            Inovação Tecnológica em Salvamento
+        </span>
+        <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
+            BuscaSmart
+        </h1>
+        <p class="text-base text-slate-300 leading-relaxed">
+            Uma plataforma digital moderna para delimitar, organizar e gerenciar operações de busca e resgate (SAR) territoriais através de sensoriamento remoto, inteligência geoespacial e inteligência artificial.
+        </p>
+    </div>
+
+    <!-- 3 Pilares Principais (Inspirado exatamente na Imagem 7) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Pilar 1: Organização -->
+        <div class="bg-tactical-900 border border-slate-800 rounded-2xl p-6 shadow-sm hover:border-emerald-500/40 transition space-y-3">
+            <div class="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-xl text-emerald-400">
+                ✓
+            </div>
+            <h3 class="text-base font-bold text-white">Organização</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+                Centralize todas as operações de busca em um único sistema organizado, eliminando falhas de comunicação e registros em papel.
+            </p>
+        </div>
+
+        <!-- Pilar 2: Visibilidade -->
+        <div class="bg-tactical-900 border border-slate-800 rounded-2xl p-6 shadow-sm hover:border-emerald-500/40 transition space-y-3">
+            <div class="w-12 h-12 rounded-xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-xl text-cyan-400">
+                👁️
+            </div>
+            <h3 class="text-base font-bold text-white">Visibilidade</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+                Aumente a visibilidade com mapa de satélite de alta precisão, delimitando perímetros e faixas de varredura automatizadas.
+            </p>
+        </div>
+
+        <!-- Pilar 3: Gestão -->
+        <div class="bg-tactical-900 border border-slate-800 rounded-2xl p-6 shadow-sm hover:border-emerald-500/40 transition space-y-3">
+            <div class="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-xl text-amber-400">
+                📊
+            </div>
+            <h3 class="text-base font-bold text-white">Gestão</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+                Ferramenta profissional para coordenadores e equipes monitorarem a conclusão dos setores e gerarem relatórios oficiais instantâneos.
+            </p>
+        </div>
+    </div>
+
+    <!-- Nossos Objetivos (Inspirado na Imagem 7) -->
+    <div class="bg-tactical-900 border border-slate-800 rounded-2xl p-8 shadow-sm space-y-6">
+        <h2 class="text-xl font-bold text-white">Nossos Objetivos</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="flex items-start gap-4">
+                <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0">
+                    ✓
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold text-white">Centralizar Informações</h4>
+                    <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                        Unificar dados operacionais em um sistema digital ágil e acessível de qualquer dispositivo em campo.
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-start gap-4">
+                <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0">
+                    ✓
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold text-white">Facilitar Acesso aos Voluntários</h4>
+                    <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                        Permitir que participantes e brigadistas recebam suas rotas geográficas via QR Code com um clique.
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-start gap-4">
+                <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0">
+                    ✓
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold text-white">Agilidade em Tempo de Resposta</h4>
+                    <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                        Reduzir o tempo de planejamento inicial de horas para minutos com o cálculo de área georreferenciado e divisão com Turf.js.
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-start gap-4">
+                <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0">
+                    ✓
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold text-white">Assistência Tática Inteligente</h4>
+                    <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                        Fornecer análises e resumos com IA para o comando de operações focar nas decisões que salvam vidas.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acesso Rápido com QR Code (Inspirado na Imagem 6) -->
+    <div class="bg-tactical-900 border border-slate-800 rounded-2xl p-8 shadow-sm flex flex-col md:flex-row items-center justify-between gap-8">
+        <div class="space-y-4 max-w-xl">
+            <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-emerald-400">
+                <span>📱</span>
+                <span>Acesso Rápido Mobile</span>
+            </div>
+            <h2 class="text-xl font-bold text-white">Acesse o BuscaSmart pelo Celular</h2>
+            <p class="text-xs text-slate-300 leading-relaxed">
+                Escaneie o código QR ao lado para abrir a plataforma diretamente em qualquer smartphone ou tablet. 
+                Os voluntários podem visualizar os limites do setor delimitado em tempo real, sem necessidade de instalar aplicativos pesados.
+            </p>
+            <div class="flex flex-wrap gap-3 pt-2">
+                <a href="{% url 'dashboard' %}" class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs px-4 py-2 rounded-lg transition">
+                    Ir para o Dashboard
+                </a>
+                <a href="{% url 'chat_ia' %}" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium text-xs px-4 py-2 rounded-lg transition">
+                    Conversar com a IA
+                </a>
+            </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl shadow-xl flex flex-col items-center gap-3 shrink-0">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://buscasmart.app" alt="QR Code BuscaSmart" class="w-40 h-40">
+            <span class="text-xs font-bold text-slate-800 font-mono">BuscaSmart • Scan & Acesse</span>
+        </div>
+    </div>
+
+    <!-- Tecnologias e Arquitetura (Inspirado na Imagem 8) -->
+    <div class="bg-tactical-900 border border-slate-800 rounded-2xl p-8 shadow-sm space-y-6">
+        <div>
+            <h2 class="text-xl font-bold text-white">Tecnologia & Engenharia de Software</h2>
+            <p class="text-xs text-slate-400 mt-1">Este projeto foi desenvolvido com tecnologias modernas de código aberto, garantindo segurança, agilidade e escalabilidade.</p>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80 text-center space-y-1">
+                <span class="text-lg font-bold text-white block">Python 3.12</span>
+                <span class="text-xs text-emerald-400 font-medium">Backend & Lógica Tática</span>
+            </div>
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80 text-center space-y-1">
+                <span class="text-lg font-bold text-white block">Django 6.1</span>
+                <span class="text-xs text-cyan-400 font-medium">Framework Robusto</span>
+            </div>
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80 text-center space-y-1">
+                <span class="text-lg font-bold text-white block">Leaflet + Turf.js</span>
+                <span class="text-xs text-orange-400 font-medium">Sensoriamento & Geoespacial</span>
+            </div>
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80 text-center space-y-1">
+                <span class="text-lg font-bold text-white block">Tailwind CSS</span>
+                <span class="text-xs text-teal-400 font-medium">Design & UI Tática</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Equipe e Créditos do Projeto (Inspirado na Imagem 8) -->
+    <div class="bg-tactical-900 border border-slate-800 rounded-2xl p-8 shadow-sm space-y-4">
+        <h2 class="text-xl font-bold text-white">Equipe Responsável & Desenvolvimento</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 text-xs">
+            <div class="space-y-1 p-4 bg-slate-950 rounded-xl border border-slate-800">
+                <span class="text-slate-400 block font-semibold">Desenvolvimento e Arquitetura:</span>
+                <strong class="text-sm text-white block">Marcos Paulo Santos Lira</strong>
+                <p class="text-slate-400">Engenharia de Software, Soluções Geoespaciais e Integração de IA.</p>
+            </div>
+            <div class="space-y-1 p-4 bg-slate-950 rounded-xl border border-slate-800">
+                <span class="text-slate-400 block font-semibold">Finalidade e Aplicação:</span>
+                <strong class="text-sm text-white block">Operações de Busca e Resgate Territorial (SAR)</strong>
+                <p class="text-slate-400">Apoio a brigadistas, Defesa Civil, Bombeiros e equipes de resposta rápida.</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

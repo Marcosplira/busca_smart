@@ -1,0 +1,203 @@
+{% extends 'operacoes/base.html' %}
+
+{% block title %}Chat com IA — BuscaSmart{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto flex flex-col h-[calc(100vh-140px)]">
+
+    <!-- Topo do Chat (Inspirado na Imagem 2) -->
+    <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div class="space-y-1">
+            <a href="{% url 'dashboard' %}" class="text-xs text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+                <span>←</span> Voltar ao painel
+            </a>
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">🤖</span>
+                <div>
+                    <h1 class="text-lg font-bold text-white">Assistente BuscaSmart</h1>
+                    <p class="text-xs text-slate-400">Inteligência tática para operações, setores, voluntários e dados SAR</p>
+                </div>
+            </div>
+        </div>
+
+        <button id="btn-ia-topo-resumo" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-4 py-2 rounded-lg shadow-md shadow-emerald-600/30 transition flex items-center gap-1.5 cursor-pointer">
+            <span>⚡</span>
+            <span>Gerar resumo</span>
+        </button>
+    </div>
+
+    <!-- Área de Mensagens (Rolagem Automática) -->
+    <div id="mensagens-chat" class="flex-1 overflow-y-auto py-6 space-y-6 pr-2">
+
+        <!-- Mensagem Inicial de Boas-Vindas da IA (Exatamente como na Imagem 2) -->
+        <div class="bg-tactical-900 border border-slate-800 rounded-2xl p-6 shadow-sm space-y-4 max-w-3xl">
+            <div class="flex items-center gap-2">
+                <span class="text-lg">🤖</span>
+                <h3 class="text-sm font-bold text-white">Olá, Marcos! Sou o assistente com IA do BuscaSmart. 😊</h3>
+            </div>
+
+            <p class="text-xs text-slate-300 leading-relaxed">
+                Posso analisar em tempo real todos os dados da operação para você:
+            </p>
+
+            <ul class="text-xs space-y-2 text-slate-300">
+                <li class="flex items-start gap-2">
+                    <span>🗺️</span>
+                    <span><strong>Análise Geográfica:</strong> Cálculo de hectares, relevo e delimitação de setores via Turf.js.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span>⚠️</span>
+                    <span><strong>Pontos de Risco & Evidências:</strong> Acompanhamento de vestígios e localização do Último Ponto Visto (LKP).</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span>👥</span>
+                    <span><strong>Alocação de Equipes:</strong> Dimensionamento de voluntários por setor e instruções táticas de varredura.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span>📋</span>
+                    <span><strong>Diretrizes SAR / IAMSAR:</strong> Sugestões de busca em linha, varredura em espiral e contingência.</span>
+                </li>
+            </ul>
+
+            <p class="text-xs text-slate-400 italic pt-2 border-t border-slate-800/80">
+                Clique em uma das opções rápidas abaixo ou escreva sua pergunta:
+            </p>
+
+            <!-- Botões de Ações Rápidas (Pills como na Imagem 2) -->
+            <div class="flex flex-wrap gap-2 pt-1">
+                <button onclick="enviarMensagemRapida('Bom dia!')" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-emerald-500/50 text-slate-200 text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition cursor-pointer">
+                    <span>👋</span> Bom dia!
+                </button>
+                <button onclick="enviarMensagemRapida('Status das Operações')" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-emerald-500/50 text-slate-200 text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition cursor-pointer">
+                    <span>📊</span> Status das Operações
+                </button>
+                <button onclick="enviarMensagemRapida('Análise de Perímetro')" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-emerald-500/50 text-slate-200 text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition cursor-pointer">
+                    <span>🗺️</span> Análise de Perímetro
+                </button>
+                <button onclick="enviarMensagemRapida('Alocação de Equipes')" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-emerald-500/50 text-slate-200 text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition cursor-pointer">
+                    <span>👥</span> Alocação de Equipes
+                </button>
+                <button onclick="enviarMensagemRapida('Resumo Completo')" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-emerald-500/50 text-slate-200 text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition cursor-pointer">
+                    <span>📄</span> Resumo Completo
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Indicador de Digitação -->
+    <div id="indicador-digitando" class="text-xs text-emerald-400 py-1 px-3 flex items-center gap-2 hidden animate-pulse">
+        <span>🤖</span>
+        <span>Assistente analisando telemetria...</span>
+    </div>
+
+    <!-- Barra Inferior de Entrada (Input de Chat) -->
+    <div class="pt-3 border-t border-slate-800">
+        <form id="form-chat" class="flex items-center gap-3">
+            <div class="relative flex-1">
+                <input type="text" id="input-mensagem" placeholder="Escreva uma pergunta sobre as buscas, setores, equipes ou diga 'Bom dia'..." 
+                       class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-4 pr-10 py-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition shadow-inner">
+            </div>
+            <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-5 py-3 rounded-xl transition flex items-center gap-2 cursor-pointer shadow-md shadow-emerald-600/30 shrink-0">
+                <span>Enviar</span>
+                <span>➤</span>
+            </button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const container = document.getElementById('mensagens-chat');
+    const form = document.getElementById('form-chat');
+    const input = document.getElementById('input-mensagem');
+    const indicador = document.getElementById('indicador-digitando');
+
+    function scrollFinal() {
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function adicionarMensagemUsuario(texto) {
+        const div = document.createElement('div');
+        div.className = "flex justify-end";
+        div.innerHTML = `
+            <div class="bg-emerald-600 text-white text-xs md:text-sm px-4 py-3 rounded-2xl rounded-tr-sm max-w-lg shadow-md leading-relaxed">
+                ${texto}
+            </div>
+        `;
+        container.appendChild(div);
+        scrollFinal();
+    }
+
+    function formatarMarkdownBasico(texto) {
+        // Converte **negrito** e quebras de linha
+        let html = texto
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/`(.*?)`/g, '<code class="bg-slate-950 px-1.5 py-0.5 rounded text-amber-300 font-mono text-[11px]">$1</code>')
+            .replace(/\n\n/g, '<br><br>')
+            .replace(/\n/g, '<br>');
+        return html;
+    }
+
+    function adicionarMensagemIA(texto) {
+        const div = document.createElement('div');
+        div.className = "flex justify-start";
+        div.innerHTML = `
+            <div class="bg-tactical-900 border border-slate-800 text-slate-200 text-xs md:text-sm px-5 py-4 rounded-2xl rounded-tl-sm max-w-2xl shadow-sm leading-relaxed space-y-2">
+                <div class="flex items-center gap-2 mb-1 text-emerald-400 font-semibold text-xs">
+                    <span>🤖</span>
+                    <span>BuscaSmart IA</span>
+                </div>
+                <div>${formatarMarkdownBasico(texto)}</div>
+            </div>
+        `;
+        container.appendChild(div);
+        scrollFinal();
+    }
+
+    async function enviarParaIA(mensagem) {
+        indicador.classList.remove('hidden');
+        try {
+            const resp = await fetch('{% url "api_chat_ia" %}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mensagem: mensagem })
+            });
+
+            if (resp.ok) {
+                const dados = await resp.json();
+                adicionarMensagemIA(dados.resposta);
+            } else {
+                adicionarMensagemIA("Desculpe, ocorreu um erro ao processar sua pergunta. Tente novamente.");
+            }
+        } catch (e) {
+            adicionarMensagemIA("Falha na conexão com o servidor de inteligência.");
+        } finally {
+            indicador.classList.add('hidden');
+        }
+    }
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const texto = input.value.trim();
+        if (!texto) return;
+
+        adicionarMensagemUsuario(texto);
+        input.value = '';
+        enviarParaIA(texto);
+    });
+
+    function enviarMensagemRapida(texto) {
+        adicionarMensagemUsuario(texto);
+        enviarParaIA(texto);
+    }
+
+    // Botão de resumo no topo
+    document.getElementById('btn-ia-topo-resumo').addEventListener('click', () => {
+        enviarMensagemRapida('Resumo Completo');
+    });
+</script>
+{% endblock %}
