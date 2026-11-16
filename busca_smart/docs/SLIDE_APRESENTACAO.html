@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apresentação Executiva — BuscaSmart SAR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        tactical: {
+                            950: '#070a0f',
+                            900: '#0c121c',
+                            850: '#111a28',
+                            800: '#172336',
+                            700: '#223450',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .slide {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .slide.active {
+            display: flex;
+            opacity: 1;
+        }
+        .progress-bar-fill {
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-tactical-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-black font-sans overflow-x-hidden">
+
+    <!-- Top Bar -->
+    <header class="border-b border-slate-800/80 bg-tactical-900/90 backdrop-blur px-8 py-4 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold text-lg">
+                ⚡
+            </div>
+            <div>
+                <span class="font-extrabold text-base tracking-wide text-white">BUSCA<span class="text-emerald-400">SMART</span></span>
+                <span class="text-[11px] text-slate-400 block font-mono">APRESENTAÇÃO EXECUTIVA • SAR 1.0</span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4 text-xs font-mono text-slate-400">
+            <span id="slide-indicator" class="bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg text-emerald-400 font-bold">Slide 1 / 10</span>
+            <a href="http://127.0.0.1:8080/" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white font-sans font-semibold px-3.5 py-1.5 rounded-lg transition text-xs flex items-center gap-1.5 shadow-sm">
+                <span>🚀</span>
+                <span>Abrir Sistema ao Vivo</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Slide Container -->
+    <main class="flex-1 max-w-6xl w-full mx-auto p-6 md:p-12 flex flex-col justify-center">
+
+        <!-- SLIDE 1: Capa -->
+        <section class="slide active flex-col items-center text-center space-y-6" data-slide="1">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold uppercase tracking-widest">
+                <span>🛡️</span>
+                <span>Tecnologia de Salvamento e Defesa Civil</span>
+            </div>
+            <h1 class="text-4xl md:text-6xl font-black text-white tracking-tight leading-tight max-w-4xl">
+                Sistema de Gestão Inteligente de <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">Buscas e Salvamento (SAR)</span>
+            </h1>
+            <p class="text-base md:text-lg text-slate-400 max-w-2xl font-normal leading-relaxed">
+                Plataforma tática para delimitar áreas no mapa, dividir setores automaticamente entre equipes, traçar rotas e coordenar resgates em tempo real — inclusive <strong>totalmente sem internet</strong>.
+            </p>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl w-full pt-6">
+                <div class="bg-tactical-900 border border-slate-800 p-4 rounded-xl text-left">
+                    <span class="text-2xl block mb-1">🗺️</span>
+                    <strong class="text-white text-sm block">Satélite & Turf.js</strong>
+                    <span class="text-slate-400 text-xs">Divisão instantânea de setores</span>
+                </div>
+                <div class="bg-tactical-900 border border-slate-800 p-4 rounded-xl text-left">
+                    <span class="text-2xl block mb-1">📡</span>
+                    <strong class="text-white text-sm block">100% Offline</strong>
+                    <span class="text-slate-400 text-xs">GPS celular sem sinal de torre</span>
+                </div>
+                <div class="bg-tactical-900 border border-slate-800 p-4 rounded-xl text-left">
+                    <span class="text-2xl block mb-1">🤖</span>
+                    <strong class="text-white text-sm block">IA Especializada</strong>
+                    <span class="text-slate-400 text-xs">Briefing situacional e chatbot</span>
+                </div>
+                <div class="bg-tactical-900 border border-slate-800 p-4 rounded-xl text-left">
+                    <span class="text-2xl block mb-1">📄</span>
+                    <strong class="text-white text-sm block">Relatório Oficial</strong>
+                    <span class="text-slate-400 text-xs">Dossiê pericial pronto para PDF</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 2: O Problema Real -->
+        <section class="slide flex-col space-y-6" data-slide="2">
+            <div class="text-xs font-semibold text-rose-400 uppercase tracking-wider">⚠️ O Cenário Atual no Brasil</div>
+            <h2 class="text-3xl md:text-4xl font-bold text-white">Como as buscas são feitas hoje: o gargalo do papel e do improviso</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+                <div class="bg-tactical-900 border border-rose-500/20 p-6 rounded-2xl space-y-3">
+                    <div class="w-12 h-12 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center text-2xl font-bold">📄</div>
+                    <h3 class="text-lg font-bold text-white">Mapas em Papel & Desenho Manual</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Coordenadores perdem horas tentando medir distâncias em réguas de papel ou desenhando croquis imprecisos que não correspondem ao relevo real.
+                    </p>
+                </div>
+                <div class="bg-tactical-900 border border-amber-500/20 p-6 rounded-2xl space-y-3">
+                    <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-2xl font-bold">💬</div>
+                    <h3 class="text-lg font-bold text-white">Comunicação Fragmentada em WhatsApp</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Instruções enviadas em áudios soltos geram sobreposição de voluntários na mesma área, enquanto quadrantes inteiros ficam sem cobertura.
+                    </p>
+                </div>
+                <div class="bg-tactical-900 border border-cyan-500/20 p-6 rounded-2xl space-y-3">
+                    <div class="w-12 h-12 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center text-2xl font-bold">⏳</div>
+                    <h3 class="text-lg font-bold text-white">Perda da Janela Crítica de Sobrevivência</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        As primeiras 24 a 48 horas são cruciais para desidratação e hipotermia. Cada hora gasta organizando a equipe reduz drasticamente as chances de resgate com vida.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 3: O Caso Prático de Picuí -->
+        <section class="slide flex-col space-y-6" data-slide="3">
+            <div class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">🌵 Caso de Uso Piloto</div>
+            <h2 class="text-3xl md:text-4xl font-bold text-white">Operação Rural em Picuí - PB: 10 km² e 20 Voluntários</h2>
+            <div class="bg-tactical-900 border border-slate-800 p-8 rounded-2xl space-y-6">
+                <p class="text-sm md:text-base text-slate-300 leading-relaxed">
+                    Imagine o alerta da Defesa Civil: <span class="text-emerald-400 font-semibold">um morador idoso se perdeu na Caatinga</span> em terreno de serra e vegetação espinhosa. A equipe de resgate conta com 20 participantes civis e bombeiros.
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                        <span class="text-xs text-slate-400 block font-mono">1. DELIMITAÇÃO</span>
+                        <strong class="text-white text-sm">Polígono no Satélite</strong>
+                        <p class="text-[11px] text-slate-400 mt-1">Coordenador clica 4 pontos e fecha o perímetro da ocorrência.</p>
+                    </div>
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                        <span class="text-xs text-slate-400 block font-mono">2. CÁLCULO TURF.JS</span>
+                        <strong class="text-emerald-400 text-sm">1.000 Hectares</strong>
+                        <p class="text-[11px] text-slate-400 mt-1">Área e perímetro calculados na hora sem necessidade de fórmulas.</p>
+                    </div>
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                        <span class="text-xs text-slate-400 block font-mono">3. AUTO-DIVISÃO</span>
+                        <strong class="text-white text-sm">20 Quadrantes</strong>
+                        <p class="text-[11px] text-slate-400 mt-1">Divisão em fatias geográficas identificadas por cores e códigos.</p>
+                    </div>
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                        <span class="text-xs text-slate-400 block font-mono">4. ATRIBUIÇÃO NOMINAL</span>
+                        <strong class="text-cyan-400 text-sm">Setor 01 — Júnior</strong>
+                        <p class="text-[11px] text-slate-400 mt-1">Cada voluntário recebe sua rota com 1 clique pelo celular.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 4: Os 8 Módulos Funcionais -->
+        <section class="slide flex-col space-y-6" data-slide="4">
+            <div class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">📦 Arquitetura Funcional</div>
+            <h2 class="text-3xl md:text-4xl font-bold text-white">8 Módulos Completos em Uma Única Plataforma</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+                <div class="bg-tactical-900 border border-slate-800 p-4 rounded-xl">
+                    <span class="text-xl">🗺️</span>
+                    <h4 class="text-white font-bold text-xs mt-2">1. Mapa Inteligente</h4>
+                    <p class="text-[11px] text-slate-400 mt-1">Satélite Esri e polígonos com medição em km².</p>
+                </div>
+                <div class="bg-tactical-900 border border-slate-800 p-4 rounded-xl">
+                    <span class="text-xl">✂️</span>
+                    <h4 class="text-white font-bold text-xs mt-2">2. Divisão Automática</h4>
+                    <p class="text-[11px] text-slate-400 mt-1">Particionamento em N setores balanceados.</p>
+                </div>
+                <div class="bg-tactical-900 border border-slate-800 p-4 rounded-xl">
+                    <span class="text-xl">✏️</span>
+                    <h4 class="text-white font-bold text-xs mt-2">3. Rotas Manuais</h4>
+                    <p class="text-[11px] text-slate-400 mt-1">Desenho livre de trajetos e trilhas de acesso.</p>
+                </div>
+                <div class="bg-tactical-900 border border-slate-800 p-4 rounded-xl">
+                    <span class="text-xl">⚡</span>
+                    <h4 class="text-white font-bold text-xs mt-2">4. Rotas Automáticas</h4>
+                    <p class="text-[11px] text-slate-400 mt-1">Varredura em zigue-zague por algoritmos.</p>
+                </div>
+                <div class="bg-tactical-900 border border-slate-800 p-4 rounded-xl">
+                    <span class="text-xl">🤖</span>
+                    <h4 class="text-white font-bold text-xs mt-2">5. IA SAR</h4>
+                    <p class="text-[11px] text-slate-400 mt-1">Briefing operacional dinâmico e chat tático.</p>
+                </div>
+                <div class="bg-tactical-900 border border-slate-800 p-4 rounded-xl">
+                    <span class="text-xl">👥</span>
+                    <h4 class="text-white font-bold text-xs mt-2">6. Efetivo Nominal</h4>
+                    <p class="text-[11px] text-slate-400 mt-1">Controle de voluntários e status de varredura.</p>
+                </div>
+                <div class="bg-tactical-900 border border-slate-800 p-4 rounded-xl">
+                    <span class="text-xl">📲</span>
+                    <h4 class="text-white font-bold text-xs mt-2">7. Compartilhamento</h4>
+                    <p class="text-[11px] text-slate-400 mt-1">Código de acesso de 6 letras e QR Code.</p>
+                </div>
+                <div class="bg-tactical-900 border border-slate-800 p-4 rounded-xl">
+                    <span class="text-xl">📡</span>
+                    <h4 class="text-white font-bold text-xs mt-2">8. Modo Offline</h4>
+                    <p class="text-[11px] text-slate-400 mt-1">Cache local de mapas e GPS telemétrico.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 5: Modo Offline & Resiliência -->
+        <section class="slide flex-col space-y-6" data-slide="5">
+            <div class="text-xs font-semibold text-cyan-400 uppercase tracking-wider">📡 Resiliência Operacional</div>
+            <h2 class="text-3xl md:text-4xl font-bold text-white">Como Funciona Totalmente Sem Internet</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                <div class="bg-tactical-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">🛰️</span>
+                        <h3 class="text-lg font-bold text-white">GPS do Aparelho ≠ Internet Móvel</h3>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        O chip GPS do smartphone comunica diretamente com a constelação de satélites em órbita (GPS, GLONASS, Galileo). Ele <strong>não depende de torres 4G/5G</strong> e funciona no meio da caatinga ou montanha.
+                    </p>
+                    <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 font-mono text-xs text-emerald-400">
+                        Latitude: -6.5122 | Longitude: -36.3469 | Precisão: ± 4m
+                    </div>
+                </div>
+                <div class="bg-tactical-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">💾</span>
+                        <h3 class="text-lg font-bold text-white">Cache Local e Sincronização Posterior</h3>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Ao entrar na missão no Posto de Comando, o voluntário clica em <strong>"Baixar para Modo Offline"</strong>. As coordenadas dos setores, instruções e pontos de referência ficam salvos na memória local.
+                    </p>
+                    <p class="text-xs text-slate-400">
+                        Ao retornar à base ou recuperar sinal, o sistema sincroniza automaticamente as evidências e setores concluídos.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 6: A Inteligência Artificial SAR -->
+        <section class="slide flex-col space-y-6" data-slide="6">
+            <div class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">🤖 Assistência Operacional</div>
+            <h2 class="text-3xl md:text-4xl font-bold text-white">Inteligência Artificial Focada no Salvamento</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                <div class="bg-tactical-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+                    <h3 class="text-base font-bold text-emerald-400 flex items-center gap-2">
+                        <span>⚡</span>
+                        <span>Resumo Tático no Dashboard</span>
+                    </h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Analisa automaticamente os dados da missão em tempo real: percentual de setores varridos, setores atrasados, alertas de risco de queda ou insolação e sugere o remanejamento imediato de equipes.
+                    </p>
+                    <div class="p-3 bg-slate-950 rounded-xl border border-emerald-500/20 text-xs text-slate-300">
+                        "Setor 01 concluído por Júnior. Setor 02 em 60%. Atenção ao Setor 03: presença de fenda profunda e escuridão iminente."
+                    </div>
+                </div>
+                <div class="bg-tactical-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+                    <h3 class="text-base font-bold text-cyan-400 flex items-center gap-2">
+                        <span>💬</span>
+                        <span>Chatbot Tático Conversacional</span>
+                    </h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Responde instantaneamente em linguagem simples e prática. O coordenador pode perguntar sobre cálculos de desidratação em caatinga, regras de preservação de vestígios ou frequências VHF de socorro.
+                    </p>
+                    <div class="p-3 bg-slate-950 rounded-xl border border-cyan-500/20 text-xs text-slate-300">
+                        "Bom dia, Comandante! Sugiro priorizar o quadrante leste antes das 11h devido ao pico térmico na região de Picuí."
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 7: Telas Desenvolvidas -->
+        <section class="slide flex-col space-y-6" data-slide="7">
+            <div class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">🖥️ Telas Prontas para Teste</div>
+            <h2 class="text-3xl md:text-4xl font-bold text-white">Navegação Completa da Solução</h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-left">
+                <div class="bg-tactical-900 border border-slate-800 p-4 rounded-xl">
+                    <span class="text-xs font-mono text-emerald-400 block mb-1">/</span>
+                    <strong class="text-white text-sm block">Página Inicial</strong>
+                    <span class="text-xs text-slate-400">Apresentação comercial e institucional</span>
+                </div>
+                <div class="bg-tactical-900 border border-slate-800 p-4 rounded-xl">
+                    <span class="text-xs font-mono text-emerald-400 block mb-1">/dashboard/</span>
+                    <strong class="text-white text-sm block">Painel Geral</strong>
+                    <span class="text-xs text-slate-400">KPIs, métricas e IA situacional</span>
+                </div>
+                <div class="bg-tactical-900 border border-slate-800 p-4 rounded-xl">
+                    <span class="text-xs font-mono text-emerald-400 block mb-1">/mapa/</span>
+                    <strong class="text-white text-sm block">Mapa & Satélite</strong>
+                    <span class="text-xs text-slate-400">Delimitação e auto-divisão de setores</span>
+                </div>
+                <div class="bg-tactical-900 border border-slate-800 p-4 rounded-xl">
+                    <span class="text-xs font-mono text-emerald-400 block mb-1">/equipe/</span>
+                    <strong class="text-white text-sm block">Gestão de Equipes</strong>
+                    <span class="text-xs text-slate-400">Atribuição de resgatistas e QR Code</span>
+                </div>
+                <div class="bg-tactical-900 border border-slate-800 p-4 rounded-xl">
+                    <span class="text-xs font-mono text-emerald-400 block mb-1">/rota/</span>
+                    <strong class="text-white text-sm block">Minha Rota (Mobile)</strong>
+                    <span class="text-xs text-slate-400">GPS telemétrico e modo offline</span>
+                </div>
+                <div class="bg-tactical-900 border border-slate-800 p-4 rounded-xl">
+                    <span class="text-xs font-mono text-emerald-400 block mb-1">/relatorio/1/</span>
+                    <strong class="text-white text-sm block">Relatório Oficial</strong>
+                    <span class="text-xs text-slate-400">Ficha A4 impressa e pericial</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 8: Proposta Comercial -->
+        <section class="slide flex-col space-y-6" data-slide="8">
+            <div class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">💼 Modelo de Negócio</div>
+            <h2 class="text-3xl md:text-4xl font-bold text-white">Monetização e Potencial de Mercado</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                <div class="bg-tactical-900 border border-slate-800 p-6 rounded-2xl space-y-3">
+                    <span class="text-xs font-mono text-emerald-400 uppercase font-semibold">Plano Voluntário</span>
+                    <h3 class="text-2xl font-bold text-white">Gratuito / Básico</h3>
+                    <p class="text-xs text-slate-400">Acesso via celular para voluntários civis ingressarem em missões ativas e usarem o GPS local.</p>
+                </div>
+                <div class="bg-tactical-900 border border-emerald-500/40 p-6 rounded-2xl space-y-3 relative shadow-lg shadow-emerald-500/5">
+                    <span class="text-xs font-mono text-emerald-400 uppercase font-bold">Mais Procurado</span>
+                    <h3 class="text-2xl font-bold text-white">Profissional SAR</h3>
+                    <p class="text-xs text-slate-300">Para ONGs de resgate, equipes com cães farejadores (K9) e grupos de montanhismo. R$ 290 / mês.</p>
+                </div>
+                <div class="bg-tactical-900 border border-cyan-500/40 p-6 rounded-2xl space-y-3">
+                    <span class="text-xs font-mono text-cyan-400 uppercase font-semibold">Institucional</span>
+                    <h3 class="text-2xl font-bold text-white">Governo & Defesa Civil</h3>
+                    <p class="text-xs text-slate-400">Contratos anuais com Prefeituras e Corpos de Bombeiros. Suporte 24/7, servidores dedicados e relatórios periciais.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 9: Publicação Android Play Store -->
+        <section class="slide flex-col space-y-6" data-slide="9">
+            <div class="text-xs font-semibold text-cyan-400 uppercase tracking-wider">🚀 Próximos Passos Técnicos</div>
+            <h2 class="text-3xl md:text-4xl font-bold text-white">Do Protótipo Web ao Aplicativo na Play Store</h2>
+            <div class="bg-tactical-900 border border-slate-800 p-8 rounded-2xl space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="space-y-2">
+                        <span class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 font-mono font-bold flex items-center justify-center text-xs">Fase 1</span>
+                        <h4 class="text-white font-bold text-sm">MVP Web Validado (Hoje)</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">Software 100% testado em Django, Tailwind CSS, Leaflet e banco SQLite populado.</p>
+                    </div>
+                    <div class="space-y-2">
+                        <span class="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 font-mono font-bold flex items-center justify-center text-xs">Fase 2</span>
+                        <h4 class="text-white font-bold text-sm">Empacotamento Capacitor</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">Geração do APK Android com acesso nativo ao GPS e armazenamento em disco.</p>
+                    </div>
+                    <div class="space-y-2">
+                        <span class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 font-mono font-bold flex items-center justify-center text-xs">Fase 3</span>
+                        <h4 class="text-white font-bold text-sm">Google Play Store</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">Assinatura de chave Google Play, geração do pacote .AAB e conformidade com Target SDK 34/35.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 10: Conclusão & Demonstração -->
+        <section class="slide flex-col items-center text-center space-y-6" data-slide="10">
+            <div class="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-3xl mx-auto text-emerald-400">
+                ✅
+            </div>
+            <h2 class="text-3xl md:text-5xl font-black text-white">Projeto 100% Pronto para Demonstração</h2>
+            <p class="text-base text-slate-300 max-w-xl leading-relaxed">
+                O BuscaSmart está rodando localmente na porta 8080 com todos os 8 módulos funcionais, banco de dados pré-carregado e documentação completa.
+            </p>
+            <div class="bg-tactical-900 border border-slate-800 p-6 rounded-2xl max-w-md w-full text-left space-y-3 font-mono text-xs">
+                <div class="flex justify-between text-slate-400">
+                    <span>URL Local:</span>
+                    <strong class="text-emerald-400">http://127.0.0.1:8080/</strong>
+                </div>
+                <div class="flex justify-between text-slate-400">
+                    <span>Usuário Coordenador:</span>
+                    <strong class="text-white">marcos</strong>
+                </div>
+                <div class="flex justify-between text-slate-400">
+                    <span>Senha de Acesso:</span>
+                    <strong class="text-white">marcos123</strong>
+                </div>
+            </div>
+            <div class="pt-4 flex items-center gap-4">
+                <a href="http://127.0.0.1:8080/login/" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-3 rounded-xl transition text-sm flex items-center gap-2 shadow-lg shadow-emerald-600/30">
+                    <span>⚡</span>
+                    <span>Entrar no Sistema Agora</span>
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Bottom Controls & Progress -->
+    <footer class="border-t border-slate-800/80 bg-tactical-900/90 backdrop-blur px-8 py-4 shrink-0">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <!-- Progress Bar -->
+            <div class="w-full sm:w-1/2 bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+                <div id="progress-bar" class="progress-bar-fill bg-emerald-500 h-full w-[10%]"></div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="flex items-center gap-3">
+                <button onclick="prevSlide()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-lg text-xs font-medium transition cursor-pointer flex items-center gap-1">
+                    <span>←</span>
+                    <span>Anterior</span>
+                </button>
+                <button onclick="nextSlide()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-5 py-2 rounded-lg text-xs transition cursor-pointer flex items-center gap-1 shadow-sm">
+                    <span>Próximo</span>
+                    <span>→</span>
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Interactive Navigation Logic -->
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 10;
+
+        function showSlide(slideNumber) {
+            if (slideNumber < 1) slideNumber = 1;
+            if (slideNumber > totalSlides) slideNumber = totalSlides;
+            currentSlide = slideNumber;
+
+            document.querySelectorAll('.slide').forEach(slide => {
+                slide.classList.remove('active');
+                if (parseInt(slide.getAttribute('data-slide')) === currentSlide) {
+                    slide.classList.add('active');
+                }
+            });
+
+            document.getElementById('slide-indicator').innerText = `Slide ${currentSlide} / ${totalSlides}`;
+            const percent = (currentSlide / totalSlides) * 100;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                showSlide(currentSlide + 1);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                showSlide(currentSlide - 1);
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'Space') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+    </script>
+</body>
+</html>

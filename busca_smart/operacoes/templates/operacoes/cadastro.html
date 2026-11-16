@@ -1,0 +1,158 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Usuário — BuscaSmart SAR</title>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        tactical: {
+                            950: '#090d16',
+                            900: '#0f172a',
+                            850: '#131e33',
+                            800: '#1e293b',
+                            700: '#334155',
+                            accent: '#10b981',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-tactical-950 text-slate-100 font-sans min-h-screen flex items-center justify-center p-4 relative overflow-hidden selection:bg-emerald-500 selection:text-white">
+
+    <!-- Imagem de Fundo Tática com Gradiente Profundo -->
+    <div class="absolute inset-0 z-0">
+        <img src="{% static 'operacoes/img/first_responder_tactical.png' %}" 
+             alt="Tactical Rescue Background" 
+             class="w-full h-full object-cover object-center opacity-25 filter blur-[2px] scale-105">
+        <div class="absolute inset-0 bg-gradient-to-t from-tactical-950 via-tactical-950/80 to-tactical-950/90"></div>
+    </div>
+
+    <!-- Container do Card de Cadastro -->
+    <div class="relative z-10 w-full max-w-md space-y-6 py-8">
+
+        <!-- Logo e Cabeçalho do Card -->
+        <div class="text-center space-y-2">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center shadow-xl shadow-emerald-500/20 text-white font-black text-2xl mx-auto border border-emerald-400/30">
+                ⚡
+            </div>
+            <div class="flex items-center justify-center gap-2 pt-1">
+                <h1 class="text-2xl font-black text-white tracking-tight">BuscaSmart</h1>
+                <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-bold px-2 py-0.5 rounded uppercase">SAR</span>
+            </div>
+            <p class="text-xs text-slate-400">Criar Conta de Coordenador ou Voluntário de Campo</p>
+        </div>
+
+        <!-- Card de Formulário -->
+        <div class="bg-tactical-900/90 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6">
+
+            <div class="border-b border-slate-800 pb-3">
+                <h2 class="text-base font-bold text-white flex items-center gap-2">
+                    <span>📝</span>
+                    <span>Novo Cadastro Operacional</span>
+                </h2>
+                <p class="text-xs text-slate-400 mt-0.5">Preencha seus dados para acessar o sistema e participar das operações</p>
+            </div>
+
+            <!-- Alerta de Erro -->
+            {% if erro %}
+            <div class="bg-rose-500/15 border border-rose-500/30 text-rose-300 p-3.5 rounded-xl text-xs flex items-center gap-2.5">
+                <span class="text-base">⚠️</span>
+                <span>{{ erro }}</span>
+            </div>
+            {% endif %}
+
+            <!-- Formulário de Cadastro -->
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Nome Completo</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 text-sm">
+                            👤
+                        </span>
+                        <input type="text" name="nome" id="nome" required placeholder="Ex: Marcos Paulo Santos Lira" 
+                               class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition shadow-inner">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Nome de Usuário (Login)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 text-sm">
+                            🏷️
+                        </span>
+                        <input type="text" name="username" id="username" required placeholder="Ex: marcos" 
+                               class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition shadow-inner font-mono">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">E-mail</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 text-sm">
+                            ✉️
+                        </span>
+                        <input type="email" name="email" id="email" placeholder="Ex: marcos@buscasmart.com" 
+                               class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition shadow-inner">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Senha</label>
+                        <input type="password" name="password" id="password" required placeholder="••••••••" 
+                               class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition shadow-inner font-mono">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Confirmar Senha</label>
+                        <input type="password" name="confirm_password" id="confirm_password" required placeholder="••••••••" 
+                               class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition shadow-inner font-mono">
+                    </div>
+                </div>
+
+                <!-- Botão de Cadastro -->
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-emerald-600/30 transition transform hover:-translate-y-0.5 cursor-pointer flex items-center justify-center gap-2 mt-2">
+                    <span>Criar Conta e Acessar Sistema</span>
+                    <span>→</span>
+                </button>
+            </form>
+
+            <!-- Links Secundários -->
+            <div class="pt-2 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800/60">
+                <a href="{% url 'login' %}" class="text-emerald-400 hover:text-emerald-300 transition flex items-center gap-1 font-semibold">
+                    <span>←</span> Já tenho uma conta (Fazer Login)
+                </a>
+                <a href="{% url 'pagina_inicial' %}" class="hover:text-white transition">
+                    Página Inicial
+                </a>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>

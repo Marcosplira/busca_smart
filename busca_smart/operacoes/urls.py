@@ -2,8 +2,9 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # Autenticação (Login e Logout de Coordenadores)
+    # Autenticação (Login, Cadastro e Logout de Coordenadores)
     path('login/', views.login_view, name='login'),
+    path('cadastro/', views.cadastro_view, name='cadastro'),
     path('logout/', views.logout_view, name='logout'),
 
     # Página Inicial (Landing Page Comercial de Apresentação)

@@ -207,6 +207,51 @@ def login_view(request):
     return render(request, 'operacoes/login.html', context)
 
 
+def cadastro_view(request):
+    """Tela de Cadastro de Novos Usuários (Coordenadores ou Voluntários)."""
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+
+    erro = None
+    sucesso = None
+    if request.method == 'POST':
+        nome = request.POST.get('nome', '').strip()
+        usuario = request.POST.get('username', '').strip().lower()
+        email = request.POST.get('email', '').strip()
+        senha = request.POST.get('password', '').strip()
+        confirmar_senha = request.POST.get('confirm_password', '').strip()
+
+        if not usuario or not senha:
+            erro = "Preencha todos os campos obrigatórios."
+        elif senha != confirmar_senha:
+            erro = "As senhas digitadas não coincidem."
+        elif len(senha) < 4:
+            erro = "A senha deve ter pelo menos 4 caracteres."
+        elif User.objects.filter(username=usuario).exists():
+            erro = f"O nome de usuário '{usuario}' já está cadastrado. Escolha outro."
+        else:
+            partes_nome = nome.split(' ', 1)
+            primeiro_nome = partes_nome[0] if partes_nome else usuario
+            sobrenome = partes_nome[1] if len(partes_nome) > 1 else ''
+
+            novo_user = User.objects.create_user(
+                username=usuario,
+                email=email,
+                password=senha,
+                first_name=primeiro_nome,
+                last_name=sobrenome
+            )
+            login(request, novo_user)
+            return redirect('dashboard')
+
+    context = {
+        'erro': erro,
+        'sucesso': sucesso,
+        'pagina_ativa': 'cadastro'
+    }
+    return render(request, 'operacoes/cadastro.html', context)
+
+
 def logout_view(request):
     """Encerra a sessão do Coordenador e redireciona para o login."""
     logout(request)
@@ -478,15 +523,26 @@ def api_chat_ia(request):
     pontos = PontoSinalizacao.objects.all()
 
     # Lógica de resposta inteligente contextual
-    if any(s in mensagem for s in ['bom dia', 'boa tarde', 'boa noite', 'olá', 'ola', 'oi']):
+    if any(s in mensagem for s in ['bom dia', 'boa tarde', 'boa noite', 'olá', 'ola', 'oi', 'e ai', 'opa']):
+        if 'boa tarde' in mensagem:
+            saudacao = "**Boa tarde, Coordenador!** 👋"
+        elif 'boa noite' in mensagem:
+            saudacao = "**Boa noite, Coordenador!** 👋"
+        elif 'bom dia' in mensagem:
+            saudacao = "**Bom dia, Coordenador!** 👋"
+        else:
+            hora = datetime.now().hour
+            saudacao = "**Bom dia, Coordenador!** 👋" if hora < 12 else ("**Boa tarde, Coordenador!** 👋" if hora < 18 else "**Boa noite, Coordenador!** 👋")
+
         resposta = (
-            "**Bom dia, Coordenador!** 👋\n\n"
-            "Sou o assistente inteligente do **BuscaSmart**. Estou pronto para auxiliar no comando tático da missão.\n\n"
-            "Como posso ajudar hoje? Você pode me perguntar sobre:\n"
-            "• **Status das operações** ativas e equipes em campo;\n"
-            "• **Recomendações de varredura** e cálculo de setores;\n"
-            "• **Alocação de voluntários** e estimativa de tempo;\n"
-            "• Ou pedir um **Resumo Completo** da base de dados."
+            f"{saudacao}\n\n"
+            f"Sou o assistente tático do **BuscaSmart**.\n\n"
+            f"Posso te ajudar de forma simples e direta com:\n"
+            f"• **Status das buscas:** ver quais frentes e voluntários estão em andamento;\n"
+            f"• **Divisão de setores:** orientar como distribuir as equipes no terreno de Picuí;\n"
+            f"• **Rotas e LKP:** como delimitar a área a partir do último ponto visto;\n"
+            f"• **Resumo geral:** conferir hectares varridos, pontos críticos e pendências.\n\n"
+            f"Como posso ajudar a sua operação agora?"
         )
 
     elif any(s in mensagem for s in ['status', 'operacoes', 'operações', 'ativas', 'andamento']):
